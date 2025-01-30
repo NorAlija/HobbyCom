@@ -9,7 +9,7 @@
         "web": "expo start --web",
         "type-check": "tsc --noEmit",
         "lint": "eslint .",
-        "lint:fix": "eslint --fix . --ext .ts,.tsx --fix",
+        "lint:fix": "eslint --fix",
         "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\" && prettier --parser json --write \"**/*.json\""
     },
     "dependencies": {
@@ -40,11 +40,12 @@
         "@babel/core": "^7.25.2",
         "@types/aes-js": "^3.1.4",
         "@types/react": "~18.3.12",
-        "@typescript-eslint/eslint-plugin": "^8.22.0",
-        "@typescript-eslint/parser": "^8.22.0",
-        "eslint": "^9.19.0",
-        "eslint-plugin-prettier": "^5.2.3",
-        "eslint-plugin-react": "^7.37.4",
+        "@typescript-eslint/eslint-plugin": "^5.55.0",
+        "@typescript-eslint/parser": "^5.55.0",
+        "eslint": "^8.36.0",
+        "eslint-config-prettier": "^8.7.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-react": "^7.37.3",
         "eslint-plugin-react-native": "^5.0.0",
         "prettier": "^3.4.2",
         "typescript": "^5.3.3"
