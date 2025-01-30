@@ -1,7 +1,7 @@
-import { createClient } from "@supabase/supabase-js"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import * as SecureStore from "expo-secure-store"
+import { createClient } from "@supabase/supabase-js"
 import * as aesjs from "aes-js"
+import * as SecureStore from "expo-secure-store"
 import "react-native-get-random-values"
 
 import dotenv from "dotenv"
@@ -10,8 +10,8 @@ import dotenv from "dotenv"
 dotenv.config()
 
 // Now you can access the environment variables using `process.env`
-const apiKey = process.env.API_KEY
-const databaseUrl = process.env.DATABASE_URL
+const apiKey: string | undefined = process.env.API_KEY
+const databaseUrl: string | undefined = process.env.DATABASE_URL
 // As Expo's SecureStore does not support values larger than 2048
 // bytes, an AES-256 key is generated and stored in SecureStore, while
 // it is used to encrypt/decrypt values stored in AsyncStorage.
@@ -61,6 +61,10 @@ class LargeSecureStore {
 
         await AsyncStorage.setItem(key, encrypted)
     }
+}
+
+if (!databaseUrl || !apiKey) {
+    throw new Error("Missing environment variables: DATABASE_URL or API_KEY")
 }
 
 export const supabase = createClient(databaseUrl, apiKey, {
