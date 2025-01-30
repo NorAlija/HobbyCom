@@ -1,50 +1,50 @@
 // Root of TS config for the client
 {
-  // Compiler options
-  "compilerOptions": {
-    // Targets modern ECMAScript features
-    "target": "ESNext",
-    // Class fields compilation strategy
-    "useDefineForClassFields": true,
-    // Libraries included
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    // Only TypeScript files
-    "allowJs": false,
-    // Skips checking .d.ts files
-    "skipLibCheck": true,
-    // Controls esModule interoperability
-    "esModuleInterop": false,
-    // Allows default imports from modules
-    "allowSyntheticDefaultImports": true,
-    // Enables strict type-checking
-    "strict": true,
-    // Case-sensitive file names
-    "forceConsistentCasingInFileNames": true,
-    // ECMAScript module
-    "module": "ESNext",
-    // Node-based module resolution
-    "moduleResolution": "Node",
-    // Allows importing .json files
-    "resolveJsonModule": true,
-    // Treat file modules as isolated
-    "isolatedModules": true,
-    // No emit output
-    "noEmit": true,
-    // Uses React Native JSX
-    "jsx": "react-native",
-    // Base directory
-    "baseUrl": ".",
-    // Type definitions
-    "typeRoots": ["node_modules/@types", "src/types"],
-    // Paths alias setup
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  // Directories to include
-  "include": ["src", "test"],
-  // References to other configs
-  "references": [{ "path": "./tsconfig.node.json" }],
-  // Inherits base settings from Expo
-  "extends": "./node_modules/expo/tsconfig.base"
+    // Compiler options
+    "compilerOptions": {
+        // Targets modern ECMAScript features
+        "target": "ESNext",
+        // Class fields compilation strategy
+        "useDefineForClassFields": true,
+        // Libraries included
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        // Only TypeScript files
+        "allowJs": false,
+        // Skips checking .d.ts files
+        "skipLibCheck": true,
+        // Controls esModule interoperability
+        "esModuleInterop": false,
+        // Allows default imports from modules
+        "allowSyntheticDefaultImports": true,
+        // Enables strict type-checking
+        "strict": true,
+        // Case-sensitive file names
+        "forceConsistentCasingInFileNames": true,
+        // ECMAScript module
+        "module": "ESNext",
+        // Node-based module resolution
+        "moduleResolution": "Node",
+        // Allows importing .json files
+        "resolveJsonModule": true,
+        // Treat file modules as isolated
+        "isolatedModules": true,
+        // No emit output
+        "noEmit": true,
+        // Uses React Native JSX
+        "jsx": "react-native",
+        // Base directory
+        "baseUrl": ".",
+        // Type definitions
+        "typeRoots": ["node_modules/@types", "src/types"],
+        // Paths alias setup
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    // Directories to include
+    "include": ["src", "test"],
+    // References to other configs
+    "references": [{ "path": "./tsconfig.node.json" }],
+    // Inherits base settings from Expo
+    "extends": "./node_modules/expo/tsconfig.base"
 }

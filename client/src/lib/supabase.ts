@@ -16,58 +16,58 @@ const databaseUrl = process.env.DATABASE_URL
 // bytes, an AES-256 key is generated and stored in SecureStore, while
 // it is used to encrypt/decrypt values stored in AsyncStorage.
 class LargeSecureStore {
-  private async _encrypt(key: string, value: string) {
-    const encryptionKey = crypto.getRandomValues(new Uint8Array(256 / 8))
+    private async _encrypt(key: string, value: string) {
+        const encryptionKey = crypto.getRandomValues(new Uint8Array(256 / 8))
 
-    const cipher = new aesjs.ModeOfOperation.ctr(encryptionKey, new aesjs.Counter(1))
-    const encryptedBytes = cipher.encrypt(aesjs.utils.utf8.toBytes(value))
+        const cipher = new aesjs.ModeOfOperation.ctr(encryptionKey, new aesjs.Counter(1))
+        const encryptedBytes = cipher.encrypt(aesjs.utils.utf8.toBytes(value))
 
-    await SecureStore.setItemAsync(key, aesjs.utils.hex.fromBytes(encryptionKey))
+        await SecureStore.setItemAsync(key, aesjs.utils.hex.fromBytes(encryptionKey))
 
-    return aesjs.utils.hex.fromBytes(encryptedBytes)
-  }
-
-  private async _decrypt(key: string, value: string) {
-    const encryptionKeyHex = await SecureStore.getItemAsync(key)
-    if (!encryptionKeyHex) {
-      return encryptionKeyHex
+        return aesjs.utils.hex.fromBytes(encryptedBytes)
     }
 
-    const cipher = new aesjs.ModeOfOperation.ctr(
-      aesjs.utils.hex.toBytes(encryptionKeyHex),
-      new aesjs.Counter(1)
-    )
-    const decryptedBytes = cipher.decrypt(aesjs.utils.hex.toBytes(value))
+    private async _decrypt(key: string, value: string) {
+        const encryptionKeyHex = await SecureStore.getItemAsync(key)
+        if (!encryptionKeyHex) {
+            return encryptionKeyHex
+        }
 
-    return aesjs.utils.utf8.fromBytes(decryptedBytes)
-  }
+        const cipher = new aesjs.ModeOfOperation.ctr(
+            aesjs.utils.hex.toBytes(encryptionKeyHex),
+            new aesjs.Counter(1)
+        )
+        const decryptedBytes = cipher.decrypt(aesjs.utils.hex.toBytes(value))
 
-  async getItem(key: string) {
-    const encrypted = await AsyncStorage.getItem(key)
-    if (!encrypted) {
-      return encrypted
+        return aesjs.utils.utf8.fromBytes(decryptedBytes)
     }
 
-    return await this._decrypt(key, encrypted)
-  }
+    async getItem(key: string) {
+        const encrypted = await AsyncStorage.getItem(key)
+        if (!encrypted) {
+            return encrypted
+        }
 
-  async removeItem(key: string) {
-    await AsyncStorage.removeItem(key)
-    await SecureStore.deleteItemAsync(key)
-  }
+        return await this._decrypt(key, encrypted)
+    }
 
-  async setItem(key: string, value: string) {
-    const encrypted = await this._encrypt(key, value)
+    async removeItem(key: string) {
+        await AsyncStorage.removeItem(key)
+        await SecureStore.deleteItemAsync(key)
+    }
 
-    await AsyncStorage.setItem(key, encrypted)
-  }
+    async setItem(key: string, value: string) {
+        const encrypted = await this._encrypt(key, value)
+
+        await AsyncStorage.setItem(key, encrypted)
+    }
 }
 
 export const supabase = createClient(databaseUrl, apiKey, {
-  auth: {
-    storage: new LargeSecureStore(),
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false
-  }
+    auth: {
+        storage: new LargeSecureStore(),
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false
+    }
 })

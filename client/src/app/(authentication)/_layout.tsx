@@ -19,14 +19,14 @@ import { Stack } from "expo-router"
 import { useAuth } from "../providers/auth-providers"
 
 export default function AuthLayout() {
-  const { loading } = useAuth()
+    const { loading } = useAuth()
 
-  if (loading) return null
+    if (loading) return null
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="signup" />
-    </Stack>
-  )
+    return (
+        <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="signup" />
+        </Stack>
+    )
 }

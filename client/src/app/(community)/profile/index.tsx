@@ -1,81 +1,81 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native"
-import React, { useState, useEffect } from "react"
-import { useAuth } from "../../providers/auth-providers"
+import React, { useEffect, useState } from "react"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { supabase } from "../../../lib/supabase"
+import { useAuth } from "../../providers/auth-providers"
 
 const Profile = () => {
-  const { signOut, user } = useAuth()
-  const [firstName, setFirstName] = useState("")
-  const [loading, setLoading] = useState(true)
+    const { signOut, user } = useAuth()
+    const [firstName, setFirstName] = useState("")
+    const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchProfile()
-  }, [user])
+    useEffect(() => {
+        fetchProfile()
+    }, [user])
 
-  const fetchProfile = async () => {
-    try {
-      if (!user) return
+    const fetchProfile = async () => {
+        try {
+            if (!user) return
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("first_name")
-        .eq("user_id", user.id)
-        .single()
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("first_name")
+                .eq("user_id", user.id)
+                .single()
 
-      if (error) {
-        console.error("Error fetching profile:", error)
-      } else if (data) {
-        setFirstName(data.first_name || "")
-      }
-    } catch (error) {
-      console.error("Error:", error)
-    } finally {
-      setLoading(false)
+            if (error) {
+                console.error("Error fetching profile:", error)
+            } else if (data) {
+                setFirstName(data.first_name || "")
+            }
+        } catch (error) {
+            console.error("Error:", error)
+        } finally {
+            setLoading(false)
+        }
     }
-  }
 
-  if (loading) {
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <Text>Loading...</Text>
+            </View>
+        )
+    }
+
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
+        <View style={styles.container}>
+            <Text style={styles.name}>{firstName || "User"}</Text>
+            <TouchableOpacity onPress={signOut} style={styles.button}>
+                <Text style={styles.buttonText}>Sign Out</Text>
+            </TouchableOpacity>
+        </View>
     )
-  }
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.name}>{firstName || "User"}</Text>
-      <TouchableOpacity onPress={signOut} style={styles.button}>
-        <Text style={styles.buttonText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
-  )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20
-  },
-  button: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
-    width: "100%",
-    maxWidth: 200,
-    alignItems: "center"
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16
-  },
-  name: {
-    fontSize: 24,
-    marginBottom: 20
-  }
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20
+    },
+    button: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: "#007bff",
+        borderRadius: 5,
+        width: "100%",
+        maxWidth: 200,
+        alignItems: "center"
+    },
+    buttonText: {
+        color: "white",
+        fontSize: 16
+    },
+    name: {
+        fontSize: 24,
+        marginBottom: 20
+    }
 })
 
 export default Profile
