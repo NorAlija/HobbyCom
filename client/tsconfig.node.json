@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "jsx": "react-native",
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

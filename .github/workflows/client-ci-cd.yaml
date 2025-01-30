@@ -1,0 +1,47 @@
+---
+name: lint client
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read
+  pull-requests: write
+  packages: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Ensures full git history for proper versioning
+          fetch-depth: 0
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Type Check
+        run: ynpm run type-check
+
+      - name: Run Linter
+        run: npm run lint:fix

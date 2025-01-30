@@ -1,0 +1,32 @@
+{
+  // Formats the document on save
+  "editor.formatOnSave": true,
+
+  // Uses Prettier as the default formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Code actions to run automatically on save
+  "editor.codeActionsOnSave": {
+    // Fix ESLint issues
+    "source.fixAll.eslint": "explicit",
+    // Format the document
+    "source.formatDocument": "explicit",
+    // Organize imports
+    "source.organizeImports": "explicit"
+  },
+
+  // Default formatter for JavaScript files
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Default formatter for TypeScript files
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Default formatter for TypeScript React files
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
