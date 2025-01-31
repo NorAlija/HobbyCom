@@ -1,4 +1,4 @@
-﻿namespace HobbyCom.Test;
+﻿namespace HobbyCom.Test.src;
 
 public class UnitTest1
 {
