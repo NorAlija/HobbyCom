@@ -26,13 +26,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore 
+        run: dotnet restore HobbyCom.Presenter.API/
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build HobbyCom.Presenter.API/ --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal --configuration Release
+        run: dotnet test HobbyCom.Presenter.API/ --no-build --verbosity normal --configuration Release
 
       # Optional: Code coverage analysis
     #   - name: Generate code coverage report
