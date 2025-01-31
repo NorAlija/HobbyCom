@@ -1,0 +1,15 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+      "DefaultConnection": "User Id=xx;Password=xx;Server=xxx;Port=xxx;Database=postgres"
+  },
+  "Supabase": {
+    "Url": "YOUR_SUPABASE_URL",
+    "Key": "YOUR_SUPABASE_KEY",
+  }
+}
