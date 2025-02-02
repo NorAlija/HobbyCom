@@ -35,26 +35,19 @@ jobs:
        with:
          fetch-depth: 0 # Fetch all history for proper versioning
 
-     # Install pnpm package manager
-     - uses: actions/checkout@v4
-     - name: Install pnpm
-       uses: pnpm/action-setup@v4
-       with:
-         version: 10
-
      # Set up Node.js environment
      - name: Set up Node.js ${{ matrix.node-version }}
        uses: actions/setup-node@v4
        with:
          node-version: ${{ matrix.node-version }}
-         cache: 'pnpm' # Enable pnpm caching
-         cache-dependency-path: './client/pnpm-lock.yaml' # Specify lock file location
+         cache: 'yarn' # Enable pnpm caching
+         cache-dependency-path: './client/yarn.lock' # Specify lock file location
 
      - name: Install Dependencies
-       run: pnpm install --frozen-lockfile
+       run: yarn install --frozen-lockfile
 
      - name: Type Check
-       run: pnpm run type-check
+       run: yarn type-check
 
      - name: Run Linter
-       run: pnpm run lint:fix
+       run: yarn lint:fix
