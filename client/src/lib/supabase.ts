@@ -4,11 +4,6 @@ import * as aesjs from "aes-js"
 import * as SecureStore from "expo-secure-store"
 import "react-native-get-random-values"
 
-import dotenv from "dotenv"
-
-// Load environment variables from the .env file
-dotenv.config()
-
 // Now you can access the environment variables using `process.env`
 const apiKey: string | undefined = process.env.API_KEY
 const databaseUrl: string | undefined = process.env.DATABASE_URL
