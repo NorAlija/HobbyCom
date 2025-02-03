@@ -62,5 +62,6 @@
   "terminal.integrated.persistentSessionScrollback": 1000,
   // Enable better integration with shell (command highlighting, etc)
   "terminal.integrated.shellIntegration.enabled": true,
+  "java.compile.nullAnalysis.mode": "automatic",
 
 }
