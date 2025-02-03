@@ -63,10 +63,4 @@
   // Enable better integration with shell (command highlighting, etc)
   "terminal.integrated.shellIntegration.enabled": true,
 
-  // Workspace specific settings
-  "files.exclude": {
-    "**/bin": true,
-    "**/obj": true,
-    "**/node_modules": true
-  },
 }
