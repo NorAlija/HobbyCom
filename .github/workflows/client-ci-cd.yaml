@@ -1,0 +1,53 @@
+# Workflow name and trigger configuration
+name: lint client
+on:
+ push:
+   branches: ['**'] # Run on all branches
+ pull_request:
+   branches:
+     - main # Run on PRs to main
+     - dev  # Run on PRs to dev
+
+# Define permissions needed for the workflow
+permissions:
+ contents: read
+ pull-requests: write
+ packages: write
+
+jobs:
+ build-and-test:
+   runs-on: ubuntu-latest
+   
+   # Define Node.js versions to test against
+   strategy:
+     matrix:
+       node-version: [20.x]
+
+   # Set working directory for all run steps
+   defaults:
+     run:
+       working-directory: ./client
+
+   steps:
+     # Check out repository code
+     - name: Checkout code
+       uses: actions/checkout@v4
+       with:
+         fetch-depth: 0 # Fetch all history for proper versioning
+
+     # Set up Node.js environment
+     - name: Set up Node.js ${{ matrix.node-version }}
+       uses: actions/setup-node@v4
+       with:
+         node-version: ${{ matrix.node-version }}
+         cache: 'yarn' # Enable pnpm caching
+         cache-dependency-path: './client/yarn.lock' # Specify lock file location
+
+     - name: Install Dependencies
+       run: yarn install --frozen-lockfile
+
+     - name: Type Check
+       run: yarn type-check
+
+     - name: Run Linter
+       run: yarn lint:fix

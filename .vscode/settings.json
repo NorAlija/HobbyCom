@@ -1,0 +1,66 @@
+{
+  // Formats the document on save
+  "editor.formatOnSave": true,
+
+  // Show bracket pair guides
+  "editor.guides.bracketPairs": true,
+
+  // Don't set a default formatter for all files
+  "editor.defaultFormatter": null,
+
+  // Code actions to run automatically on save
+  "editor.codeActionsOnSave": {
+    // Fix ESLint issues
+    "source.fixAll.eslint": "explicit",
+    // Format the document
+    "source.formatDocument": "explicit",
+    // Organize imports
+    "source.organizeImports": "explicit"
+  },
+
+  // Default formatter for JavaScript files
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Default formatter for TypeScript files
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Default formatter for TypeScript React files
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // Disable other code actions on save
+  "editor.formatOnSaveMode": "file",
+  // Optimize performance
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  // Disable running multiple formatters
+  "editor.formatOnSaveTimeout": 750,
+  "prettier.requireConfig": true,
+
+  // Terminal persistence settings
+  // Restore terminal sessions when VS Code is reopened
+  "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
+  // Enable multiple terminal tabs
+  "terminal.integrated.tabs.enabled": true,
+  // Keep terminal sessions alive between VS Code restarts
+  "terminal.integrated.enablePersistentSessions": true,
+  // Number of lines to keep in terminal history
+  "terminal.integrated.persistentSessionScrollback": 1000,
+  // Enable better integration with shell (command highlighting, etc)
+  "terminal.integrated.shellIntegration.enabled": true,
+
+}
