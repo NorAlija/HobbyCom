@@ -67,6 +67,8 @@ dist-ssr
 [Oo]bj/
 [Pp]ublish/
 
+appsettings.Development.json
+
 # Generated files
 project.lock.json
 .vs/
