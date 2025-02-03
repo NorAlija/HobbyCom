@@ -19,7 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/", () => "Hello world!"); //TODO: delete later
+app.MapGet("/", () => "Hello world!"); //TODO: To be delete later
 
 app.UseHttpsRedirection();
 app.Run();
