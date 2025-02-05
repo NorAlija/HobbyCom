@@ -1,6 +1,11 @@
+using HobbyCom.Application.src.IServices;
+using HobbyCom.Presenter.API.src.Services;
+using HobbyCom.Domain.src.IRepositories;
 using HobbyCom.Infrastructure.src.Databases;
+using HobbyCom.Infrastructure.src.Repositories;
 using HobbyCom.Presenter.API.src.HostedServices;
 using Microsoft.EntityFrameworkCore;
+using HobbyCom.Presenter.API.src.Middlewares;
 using Supabase;
 
 namespace HobbyCom.Presenter.API
@@ -9,7 +14,6 @@ namespace HobbyCom.Presenter.API
     {
         public static IServiceCollection AddProjectDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            // Register Infrastructure Services
             RegisterDBContextAndRepos(services, configuration);
 
             RegisteredServices(services, configuration);
@@ -19,25 +23,34 @@ namespace HobbyCom.Presenter.API
             return services;
         }
 
+        private static void RegisterMiddlewares(IServiceCollection services)
+        {
+            services.AddTransient<GlobalExceptionMiddleware>();
+
+        }
+
         private static void RegisteredServices(IServiceCollection services, IConfiguration configuration)
         {
 
             // Hosted Services work in the background
             services.AddHostedService<DatabaseConnectionCheckService>();
-        }
 
-        private static void RegisterMiddlewares(IServiceCollection services)
-        {
-
+            services.AddScoped<IUserService, UserService>();
         }
 
         private static void RegisterDBContextAndRepos(IServiceCollection services, IConfiguration configuration)
         {
-            // Register DbContext
             services.AddDbContext<SupabaseContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(configuration.GetConnectionString("SessionConnection"),
+                    npgsqlOptions =>
+                    {
+                        npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                        npgsqlOptions.CommandTimeout(60);
+                    }
+                )
+            );
 
-            // Register Supabase Client
+            // Register Supabase Client to usse supabase capabilities such as Realtime, Auth, Storage, etc.
             services.AddScoped<Client>((provider) =>
             {
                 var url = configuration["Supabase:Url"] ?? throw new ArgumentNullException(nameof(configuration), "Supabase URL cannot be null");
@@ -52,6 +65,8 @@ namespace HobbyCom.Presenter.API
                         AutoConnectRealtime = true
                     });
             });
+
+            services.AddScoped<IUserRepository, UserRepository>();
 
         }
     }
