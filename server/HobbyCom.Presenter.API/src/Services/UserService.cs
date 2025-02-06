@@ -42,8 +42,7 @@ namespace HobbyCom.Presenter.API.src.Services
                     { "last_name", createUserDTO.Lastname ?? string.Empty },
                     { "username", createUserDTO.Username ?? string.Empty },
                     { "phone", createUserDTO.Phone  ?? string.Empty },
-                    // { "type", createUserDTO.Type ?? "USER" },
-                    // { "avatar_url", $"https://ui-avatars.com/api/?name={createUserDTO.Firstname}+{createUserDTO.Lastname}&background=random" }
+                    { "type", createUserDTO.Type ?? "USER" },
                     { "avatar_url", $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(createUserDTO.Firstname ?? "")}" +
                              $"+{Uri.EscapeDataString(createUserDTO.Lastname ?? "")}&background=random" }
                 }

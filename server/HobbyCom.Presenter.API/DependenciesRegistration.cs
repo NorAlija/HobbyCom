@@ -7,6 +7,9 @@ using HobbyCom.Presenter.API.src.HostedServices;
 using Microsoft.EntityFrameworkCore;
 using HobbyCom.Presenter.API.src.Middlewares;
 using Supabase;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace HobbyCom.Presenter.API
 {
@@ -18,9 +21,55 @@ namespace HobbyCom.Presenter.API
 
             RegisteredServices(services, configuration);
 
+            RegisterAuthentication(services, configuration);
+
             RegisterMiddlewares(services);
 
             return services;
+        }
+
+        private static void RegisterAuthentication(IServiceCollection services, IConfiguration configuration)
+        {
+
+            var jwtSecret = configuration["Authentication:JwtSecret"] ?? throw new ArgumentNullException(nameof(configuration), "JwtSecret cannot be null");
+            var bytes = Encoding.UTF8.GetBytes(jwtSecret);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opts =>
+            {
+                opts.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(bytes),
+                    ValidIssuer = configuration["Authentication:ValidIssuer"],
+                    ValidAudience = configuration["Authentication:ValidAudience"],
+                };
+
+                // check if the token is expired. Help to revoke the access token
+                // opts.Events = new JwtBearerEvents
+                // {
+                //     OnTokenValidated = async context =>
+                //     {
+                //         var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                //         if (userId == null)
+                //         {
+                //             context.Fail("Unauthorized");
+                //             return;
+                //         }
+
+                //         var userRepo = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                //         var user = await userRepo.GetByIdAsync(Guid.Parse(userId));
+
+                //         if (user == null || user.TokenRevoked)
+                //         {
+                //             context.Fail("Token has been revoked");
+                //         }
+                //     }
+                // };
+            });
         }
 
         private static void RegisterMiddlewares(IServiceCollection services)
@@ -51,7 +100,7 @@ namespace HobbyCom.Presenter.API
             );
 
             // Register Supabase Client to usse supabase capabilities such as Realtime, Auth, Storage, etc.
-            services.AddScoped<Client>((provider) =>
+            services.AddSingleton<Client>((provider) =>
             {
                 var url = configuration["Supabase:Url"] ?? throw new ArgumentNullException(nameof(configuration), "Supabase URL cannot be null");
                 var key = configuration["Supabase:Key"];
