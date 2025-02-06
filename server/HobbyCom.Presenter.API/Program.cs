@@ -1,3 +1,4 @@
+using System.Reflection;
 using HobbyCom.Presenter.API;
 using HobbyCom.Presenter.API.src.Middlewares;
 using HobbyCom.Presenter.API.src.Utilities;
@@ -24,8 +25,27 @@ builder.Services.ConfigureSwaggerGen(setup =>
         Title = "HobbyCom API",
         Version = "v1"
     });
+
+    // Include XML comments from all relevant projects
+    var xmlFiles = new[]
+    {
+        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml",
+        "HobbyCom.Application.xml",
+        "HobbyCom.Infrastructure.xml",
+        "HobbyCom.Presenter.API.xml"
+    };
+
+    foreach (var xmlFile in xmlFiles)
+    {
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+        {
+            setup.IncludeXmlComments(xmlPath);
+        }
+    }
 });
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 

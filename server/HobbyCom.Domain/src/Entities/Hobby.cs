@@ -1,8 +1,7 @@
 namespace HobbyCom.Domain.src.Entities
 {
-    public class Hobbies
+    public class Hobby : BaseModel
     {
-        public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
         public string? ImageURL { get; set; }

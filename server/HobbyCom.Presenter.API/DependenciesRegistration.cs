@@ -39,36 +39,10 @@ namespace HobbyCom.Presenter.API
             {
                 opts.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(bytes),
                     ValidIssuer = configuration["Authentication:ValidIssuer"],
                     ValidAudience = configuration["Authentication:ValidAudience"],
                 };
-
-                // check if the token is expired. Help to revoke the access token
-                // opts.Events = new JwtBearerEvents
-                // {
-                //     OnTokenValidated = async context =>
-                //     {
-                //         var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                //         if (userId == null)
-                //         {
-                //             context.Fail("Unauthorized");
-                //             return;
-                //         }
-
-                //         var userRepo = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
-                //         var user = await userRepo.GetByIdAsync(Guid.Parse(userId));
-
-                //         if (user == null || user.TokenRevoked)
-                //         {
-                //             context.Fail("Token has been revoked");
-                //         }
-                //     }
-                // };
             });
         }
 
@@ -83,6 +57,8 @@ namespace HobbyCom.Presenter.API
 
             // Hosted Services work in the background
             services.AddHostedService<DatabaseConnectionCheckService>();
+
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             services.AddScoped<IUserService, UserService>();
         }
