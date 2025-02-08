@@ -45,7 +45,7 @@ builder.Services.ConfigureSwaggerGen(setup =>
     }
 });
 
-builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddRouting();
 
 var app = builder.Build();
 

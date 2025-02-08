@@ -21,7 +21,7 @@ namespace HobbyCom.Application.src.IServices
         /// <summary>
         /// Logout a user
         /// </summary>
-        /// <returns>Task</returns>
-        Task LogoutAsync();
+        /// <returns>True if user is logged out, false otherwise</returns>
+        Task<bool> LogoutAsync();
     }
 }

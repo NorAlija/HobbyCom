@@ -32,20 +32,21 @@ namespace HobbyCom.Presenter.API.src.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GetUserInfoDTO>> Create([FromBody] CreateUserDTO createUserDTO)
         {
-            Console.WriteLine($"Received DTO: {System.Text.Json.JsonSerializer.Serialize(createUserDTO)}");
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState
-                    .Where(x => x.Value?.Errors.Count > 0)
-                    .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
-                    .ToList();
-                Console.WriteLine($"Validation Errors: {string.Join(", ", errors)}");
-                return BadRequest(new { success = false, errors });
-            }
+            // if (!ModelState.IsValid)
+            // {
+            //     var errors = ModelState
+            //         .Where(x => x.Value?.Errors.Count > 0)
+            //         .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
+            //         .ToList();
+            //     return BadRequest(new { success = false, errors });
+            // }
 
             var createdUser = await _authenticationService.CreateAsync(createUserDTO);
-            return CreatedAtAction(nameof(Create), new { id = createdUser.Id }, new { success = true, data = createdUser });
+            return CreatedAtAction(
+                nameof(Create),
+                new { id = createdUser.Id },
+                new { success = true, data = createdUser }
+                );
         }
 
         /// <summary>
@@ -66,17 +67,14 @@ namespace HobbyCom.Presenter.API.src.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GetUserInfoDTO>> Login([FromBody] LoginUserDTO loginUserDTO)
         {
-            Console.WriteLine($"Received DTO: {System.Text.Json.JsonSerializer.Serialize(loginUserDTO)}");
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState
-                    .Where(x => x.Value?.Errors.Count > 0)
-                    .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
-                    .ToList();
-                Console.WriteLine($"Validation Errors: {string.Join(", ", errors)}");
-                return BadRequest(new { success = false, errors });
-            }
+            // if (!ModelState.IsValid)
+            // {
+            //     var errors = ModelState
+            //         .Where(x => x.Value?.Errors.Count > 0)
+            //         .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
+            //         .ToList();
+            //     return BadRequest(new { success = false, errors });
+            // }
 
             var loggedInUser = await _authenticationService.LoginAsync(loginUserDTO);
             return Ok(new { success = true, data = loggedInUser });

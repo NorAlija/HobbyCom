@@ -50,6 +50,7 @@ namespace HobbyCom.Presenter.API
         {
             services.AddTransient<GlobalExceptionMiddleware>();
 
+
         }
 
         private static void RegisteredServices(IServiceCollection services, IConfiguration configuration)

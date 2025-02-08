@@ -16,15 +16,11 @@ namespace HobbyCom.Presenter.API.src.Services
             _supabaseClient = supabaseClient;
         }
 
-
-
-        public async Task LogoutAsync()
+        public async Task<bool> LogoutAsync()
         {
             await _supabaseClient.Auth.SignOut();
+            return true;
         }
-
-
-
 
         public async Task<GetUserInfoDTO> LoginAsync(LoginUserDTO loginUserDTO)
         {
@@ -35,6 +31,8 @@ namespace HobbyCom.Presenter.API.src.Services
                 throw new ArgumentException("Password cannot be null or empty.");
 
             var authResponse = await _supabaseClient.Auth.SignIn(loginUserDTO.Email, loginUserDTO.Password);
+
+            Console.WriteLine(authResponse?.ExpiresIn);
 
             if (authResponse?.User == null)
             {
@@ -54,9 +52,6 @@ namespace HobbyCom.Presenter.API.src.Services
                 CreatedAt = authResponse.User.CreatedAt
             };
         }
-
-
-
 
         public async Task<GetUserInfoDTO> CreateAsync(CreateUserDTO createUserDTO)
         {
@@ -107,7 +102,6 @@ namespace HobbyCom.Presenter.API.src.Services
                 ? Guid.Parse(authResponse.User.Id)
                 : throw new Exception("User ID is null");
 
-            // Map to DTO and return
             return new GetUserInfoDTO
             {
                 Id = authResponse.User.Id != null ? Guid.Parse(authResponse.User.Id) : throw new Exception("User ID is null"),
