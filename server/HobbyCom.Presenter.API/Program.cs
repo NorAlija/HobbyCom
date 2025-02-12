@@ -47,6 +47,21 @@ builder.Services.ConfigureSwaggerGen(setup =>
 
 builder.Services.AddRouting();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowOrigin",
+        builder =>
+        {
+            builder
+                .SetIsOriginAllowed(_ => true)  // Allow any origin in development
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
+    );
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -70,6 +85,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRouting();
+app.UseCors("AllowOrigin");
 app.MapControllers();
 app.Run();
 
