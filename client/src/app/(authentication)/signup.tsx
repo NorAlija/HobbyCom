@@ -1,52 +1,54 @@
-
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "expo-router"
 import React, { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 import {
-    View,
-    Text,
-    StyleSheet,
     Keyboard,
-    TouchableOpacity,
-    TextInput,
-    TouchableWithoutFeedback,
     KeyboardAvoidingView,
     Platform,
-    ScrollView
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useForm, Controller } from "react-hook-form"
 import * as zod from "zod"
-import { useRouter } from "expo-router"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "../providers/auth-providers"
-
 
 const signupSchema = zod
     .object({
-        firstname: zod.string()
+        firstname: zod
+            .string()
             .min(2, { message: "Firstname must be at least 2 characters long" })
             .max(50, { message: "Firstname must not exceed 50 characters" }),
-        lastname: zod.string()
+        lastname: zod
+            .string()
             .min(2, { message: "Lastname must be at least 2 characters long" })
             .max(50, { message: "Lastname must not exceed 50 characters" }),
         email: zod.string().email({ message: "Invalid email address" }),
-        username: zod.string()
+        username: zod
+            .string()
             .min(4, { message: "Username must be at least 4 characters long" })
             .regex(/^[a-zA-Z0-9]*$/, { message: "Username must contain only letters and numbers" }),
         phone: zod.string().optional(),
         type: zod.string().default("USER"),
         avatarUrl: zod.string().optional(),
-        password: zod.string()
+        password: zod
+            .string()
             .min(8, { message: "Password must be at least 8 characters long" })
-            .regex(
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/,
-                { message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character" }
-            ),
+            .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, {
+                message:
+                    "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+            }),
         confirmPassword: zod.string()
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords do not match",
         path: ["confirmPassword"]
-    });
+    })
 
 export default function Signup() {
     const router = useRouter()
@@ -67,23 +69,22 @@ export default function Signup() {
             confirmPassword: ""
         },
         mode: "onChange"
-    });
+    })
     const onSignup = async (data: zod.infer<typeof signupSchema>) => {
         try {
-            console.log("Starting signup process...");
-            console.log("Form data:", data);
-            
-            setError("");
-            console.log("Calling signUp function...");
-            await signUp(data);
-            console.log("Signup completed successfully");
-            
+            console.log("Starting signup process...")
+            console.log("Form data:", data)
+
+            setError("")
+            console.log("Calling signUp function...")
+            await signUp(data)
+            console.log("Signup completed successfully")
         } catch (err) {
-            console.error("Detailed signup error:", err);
-            console.error("Error stack:", err instanceof Error ? err.stack : "No stack trace");
-            setError(err instanceof Error ? err.message : "Failed to sign up");
+            console.error("Detailed signup error:", err)
+            console.error("Error stack:", err instanceof Error ? err.stack : "No stack trace")
+            setError(err instanceof Error ? err.message : "Failed to sign up")
         }
-    };
+    }
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -203,7 +204,7 @@ export default function Signup() {
                                         )}
                                     </View>
                                 )}
-/>
+                            />
 
                             {/* Phone Number Input (Optional) */}
                             <Controller

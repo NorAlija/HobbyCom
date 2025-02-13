@@ -58,8 +58,8 @@ dist-ssr
 *.njsproj
 # *.sln
 *.sw?
-launch.json
-tasks.json
+# launch.json
+# tasks.json
 
 .env*
 
