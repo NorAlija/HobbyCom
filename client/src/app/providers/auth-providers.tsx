@@ -7,17 +7,18 @@ import { useRouter, useSegments } from "expo-router"
 
 
 
-// Add this type
+
 type SignUpData = {
-    email: string
-    password: string
-    firstName: string
-    lastName: string
-    phoneNumber?: string
-    username: string
-    type: string
-    avatarUrl: string
-}
+    firstname: string;
+    lastname: string;
+    email: string;
+    username: string;
+    phone?: string;
+    type?: string;
+    avatarUrl?: string;
+    password: string;
+    confirmPassword: string;
+};
 
 type AuthContextType = {
     user: User | null
@@ -67,31 +68,50 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [user, loading, segments])
 
+
+
     const signUp = async (data: SignUpData) => {
-            const url = process.env.DEVELOPMENT_URL +"/authentication/signup";
+        const url = process.env.DEVELOPMENT_URL +"/authentication/signup";
         
-            try {
-                const response = await fetch(url, {
-                    method: "POST", // Use POST to send data
-                    headers: {
-                        "Content-Type": "application/json", // Specify JSON content type
-                    },
-                    body: JSON.stringify(data), // Convert data to JSON string
-                });
-                console.log(response)
-        
-                if (!response.ok) {
-                    throw new Error(`Failed to sign up: ${response.statusText}`);
-                }
-        
-                const json = await response.json();
-                console.log("Signup successful:", json);
-                return json;
-            } catch (error) {
-                console.error("Signup error:", error);
-                throw new Error("Something went wrong during signup!");
-            }
+        const requestData = {
+            firstname: data.firstname,
+            lastname: data.lastname,
+            email: data.email,
+            username: data.username,
+            phone: data.phone || null,
+            password: data.password,
+            confirmPassword: data.confirmPassword,
+            type: data.type || null,
+            avatarUrl: data.avatarUrl || null
         };
+    
+        console.log('Attempting signup with data:', requestData);
+    
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+    
+            console.log('Response status:', response.status);
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+    
+            if (!response.ok) {
+                throw new Error(`Signup failed: ${response.status} ${responseText}`);
+            }
+    
+            const json = JSON.parse(responseText);
+            return json.data;
+        } catch (error) {
+            console.error('Signup error:', error);
+            throw error;
+        }
+    };
         
     
 

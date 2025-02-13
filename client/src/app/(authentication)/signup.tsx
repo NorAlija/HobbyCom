@@ -1,5 +1,5 @@
 
-import React, { memo, useState } from "react"
+import React, { useState } from "react"
 import {
     View,
     Text,
@@ -19,23 +19,34 @@ import { useRouter } from "expo-router"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "../providers/auth-providers"
 
-// Signup validation schema
+
 const signupSchema = zod
     .object({
-        firstName: zod.string().min(2, { message: "First name must be at least 2 characters" }),
-        lastName: zod.string().min(2, { message: "Last name must be at least 2 characters" }),
+        firstname: zod.string()
+            .min(2, { message: "Firstname must be at least 2 characters long" })
+            .max(50, { message: "Firstname must not exceed 50 characters" }),
+        lastname: zod.string()
+            .min(2, { message: "Lastname must be at least 2 characters long" })
+            .max(50, { message: "Lastname must not exceed 50 characters" }),
         email: zod.string().email({ message: "Invalid email address" }),
-        username: zod.string().min(2, {message: "Username must be unique"}),
+        username: zod.string()
+            .min(4, { message: "Username must be at least 4 characters long" })
+            .regex(/^[a-zA-Z0-9]*$/, { message: "Username must contain only letters and numbers" }),
         phone: zod.string().optional(),
-        type: zod.string().optional(),
+        type: zod.string().default("USER"),
         avatarUrl: zod.string().optional(),
-        password: zod.string().min(6, { message: "Password must be at least 6 characters long" }),
+        password: zod.string()
+            .min(8, { message: "Password must be at least 8 characters long" })
+            .regex(
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/,
+                { message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character" }
+            ),
         confirmPassword: zod.string()
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords do not match",
         path: ["confirmPassword"]
-    })
+    });
 
 export default function Signup() {
     const router = useRouter()
@@ -45,36 +56,34 @@ export default function Signup() {
     const { control, handleSubmit, formState } = useForm({
         resolver: zodResolver(signupSchema),
         defaultValues: {
-            firstName: "",
-            lastName: "",
+            firstname: "",
+            lastname: "",
             email: "",
             username: "",
             phone: "",
             type: "USER",
-            avatarURL: "",
+            avatarUrl: "",
             password: "",
             confirmPassword: ""
         },
         mode: "onChange"
-    })
+    });
     const onSignup = async (data: zod.infer<typeof signupSchema>) => {
         try {
-            setError("")
-            await signUp({
-                email: data.email,
-                password: data.password,
-                firstName: data.firstName,
-                username: data.username,
-                type: data.type,
-                avatarurl: data.avatarUrl,
-                lastName: data.lastName,
-                phoneNumber: data.phone
-            })
-            // The auth provider will handle navigation after successful signup
+            console.log("Starting signup process...");
+            console.log("Form data:", data);
+            
+            setError("");
+            console.log("Calling signUp function...");
+            await signUp(data);
+            console.log("Signup completed successfully");
+            
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to sign up")
+            console.error("Detailed signup error:", err);
+            console.error("Error stack:", err instanceof Error ? err.stack : "No stack trace");
+            setError(err instanceof Error ? err.message : "Failed to sign up");
         }
-    }
+    };
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -95,7 +104,7 @@ export default function Signup() {
                             {/* First Name Input */}
                             <Controller
                                 control={control}
-                                name="firstName"
+                                name="firstname"
                                 render={({
                                     field: { value, onChange, onBlur },
                                     fieldState: { error }
@@ -121,7 +130,7 @@ export default function Signup() {
                             {/* Last Name Input */}
                             <Controller
                                 control={control}
-                                name="lastName"
+                                name="lastname"
                                 render={({
                                     field: { value, onChange, onBlur },
                                     fieldState: { error }
@@ -170,11 +179,36 @@ export default function Signup() {
                                     </View>
                                 )}
                             />
+                            {/* Username Input */}
+                            <Controller
+                                control={control}
+                                name="username"
+                                render={({
+                                    field: { value, onChange, onBlur },
+                                    fieldState: { error }
+                                }) => (
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            placeholder="Username"
+                                            style={styles.input}
+                                            value={value}
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            placeholderTextColor="#888"
+                                            autoCapitalize="none"
+                                            editable={!formState.isSubmitting}
+                                        />
+                                        {error && (
+                                            <Text style={styles.errorText}>{error.message}</Text>
+                                        )}
+                                    </View>
+                                )}
+/>
 
                             {/* Phone Number Input (Optional) */}
                             <Controller
                                 control={control}
-                                name="phoneNumber"
+                                name="phone"
                                 render={({
                                     field: { value, onChange, onBlur },
                                     fieldState: { error }
