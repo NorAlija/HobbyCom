@@ -64,7 +64,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [user, loading, segments])
 
     const signUp = async (data: SignUpData) => {
-        const url = process.env.DEVELOPMENT_URL + "/authentication/signup"
+        const url = `${process.env.DEVELOPMENT_URL}/authentication/signup`
 
         const requestData = {
             firstname: data.firstname,
