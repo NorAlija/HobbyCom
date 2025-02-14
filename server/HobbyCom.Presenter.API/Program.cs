@@ -47,19 +47,34 @@ builder.Services.ConfigureSwaggerGen(setup =>
 
 builder.Services.AddRouting();
 
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy(
+//         "AllowOrigin",
+//         builder =>
+//         {
+//             builder
+//                 .SetIsOriginAllowed(_ => true)  // Allow any origin in development
+//                 .AllowAnyMethod()
+//                 .AllowAnyHeader()
+//                 .AllowCredentials();
+//         }
+//     );
+// });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        "AllowOrigin",
-        builder =>
+    options.AddPolicy("AllowFrontend", policyBuilder =>
+    {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+        if (allowedOrigins != null && allowedOrigins.Length > 0)
         {
-            builder
-                .SetIsOriginAllowed(_ => true)  // Allow any origin in development
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
+            policyBuilder.WithOrigins(allowedOrigins)
+                         .AllowAnyMethod()
+                         .AllowAnyHeader()
+                         .AllowCredentials();
         }
-    );
+    });
 });
 
 var app = builder.Build();
@@ -85,7 +100,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRouting();
-app.UseCors("AllowOrigin");
+app.UseCors("AllowFrontend");
 app.MapControllers();
 app.Run();
 

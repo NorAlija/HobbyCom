@@ -62,6 +62,7 @@ dist-ssr
 # tasks.json
 
 .env*
+cypress.env.json
 
 # ASP .NET Core gitignore template
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
