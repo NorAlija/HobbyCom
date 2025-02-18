@@ -323,7 +323,7 @@ export default function Signup() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "white"
+        backgroundColor: "#f0f0f0"
     },
     container: {
         flex: 1
