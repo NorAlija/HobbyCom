@@ -1,24 +1,16 @@
+import { useCreateUser } from "@/features/user-management/useCreateUser"
+import { SignUpData } from "@/types"
+import { ApiError } from "@/utils/errors"
 import { Session, User } from "@supabase/supabase-js"
 import { useRouter, useSegments } from "expo-router"
 import { createContext, useContext, useEffect, useState } from "react"
 import { supabase } from "../../lib/supabase"
 
-type SignUpData = {
-    firstname: string
-    lastname: string
-    email: string
-    username: string
-    phone?: string
-    type?: string
-    avatarUrl?: string
-    password: string
-    confirmPassword: string
-}
-
 type AuthContextType = {
     user: User | null
     session: Session | null
     loading: boolean
+    isPending: boolean
     signUp: (data: SignUpData) => Promise<void>
     signIn: (email: string, password: string) => Promise<void>
     signOut: () => Promise<void>
@@ -32,6 +24,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
     const router = useRouter()
     const segments = useSegments()
+
+    const { isPending, mutate: registerUser } = useCreateUser()
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -64,46 +58,16 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [user, loading, segments])
 
     const signUp = async (data: SignUpData) => {
-        const url = `${process.env.DEVELOPMENT_URL}/authentication/signup`
-
-        const requestData = {
-            firstname: data.firstname,
-            lastname: data.lastname,
-            email: data.email,
-            username: data.username,
-            phone: data.phone || null,
-            password: data.password,
-            confirmPassword: data.confirmPassword,
-            type: data.type || null,
-            avatarUrl: data.avatarUrl || null
-        }
-
-        console.log("Attempting signup with data:", requestData)
-
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json"
+        return new Promise<void>((resolve, reject) => {
+            registerUser(data, {
+                onSuccess: () => {
+                    resolve()
                 },
-                body: JSON.stringify(requestData)
+                onError: (error: ApiError) => {
+                    reject(error)
+                }
             })
-
-            console.log("Response status:", response.status)
-            const responseText = await response.text()
-            console.log("Response text:", responseText)
-
-            if (!response.ok) {
-                throw new Error(`Signup failed: ${response.status} ${responseText}`)
-            }
-
-            const json = JSON.parse(responseText)
-            return json.data
-        } catch (error) {
-            console.error("Signup error:", error)
-            throw error
-        }
+        })
     }
 
     const signIn = async (email: string, password: string) => {
@@ -125,6 +89,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 user,
                 session,
                 loading,
+                isPending,
                 signUp,
                 signIn,
                 signOut
