@@ -1,11 +1,15 @@
+import { signupSchema, UserData } from "@/schemas/user-schemas"
+import { ApiError } from "@/utils/errors"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "expo-router"
-import React, { useState } from "react"
+import React from "react"
 import { Controller, useForm } from "react-hook-form"
 import {
+    ActivityIndicator,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -15,47 +19,14 @@ import {
     View
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import * as zod from "zod"
 import { useAuth } from "../providers/auth-providers"
-
-const signupSchema = zod
-    .object({
-        firstname: zod
-            .string()
-            .min(2, { message: "Firstname must be at least 2 characters long" })
-            .max(50, { message: "Firstname must not exceed 50 characters" }),
-        lastname: zod
-            .string()
-            .min(2, { message: "Lastname must be at least 2 characters long" })
-            .max(50, { message: "Lastname must not exceed 50 characters" }),
-        email: zod.string().email({ message: "Invalid email address" }),
-        username: zod
-            .string()
-            .min(4, { message: "Username must be at least 4 characters long" })
-            .regex(/^[a-zA-Z0-9]*$/, { message: "Username must contain only letters and numbers" }),
-        phone: zod.string().optional(),
-        type: zod.string().default("USER"),
-        avatarUrl: zod.string().optional(),
-        password: zod
-            .string()
-            .min(8, { message: "Password must be at least 8 characters long" })
-            .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, {
-                message:
-                    "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-            }),
-        confirmPassword: zod.string()
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: "Passwords do not match",
-        path: ["confirmPassword"]
-    })
 
 export default function Signup() {
     const router = useRouter()
-    const { signUp } = useAuth()
-    const [error, setError] = useState<string>("")
+    const { signUp, isPending } = useAuth()
+    const [refreshing, setRefreshing] = React.useState(false)
 
-    const { control, handleSubmit, formState } = useForm({
+    const { control, handleSubmit, formState, setError, reset } = useForm({
         resolver: zodResolver(signupSchema),
         defaultValues: {
             firstname: "",
@@ -63,26 +34,39 @@ export default function Signup() {
             email: "",
             username: "",
             phone: "",
-            type: "USER",
-            avatarUrl: "",
             password: "",
             confirmPassword: ""
         },
         mode: "onChange"
     })
-    const onSignup = async (data: zod.infer<typeof signupSchema>) => {
-        try {
-            console.log("Starting signup process...")
-            console.log("Form data:", data)
 
-            setError("")
-            console.log("Calling signUp function...")
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true)
+        setTimeout(() => {
+            setRefreshing(false)
+            reset()
+            setError("root", { type: "manual", message: "" })
+        }, 300)
+    }, [reset, setError])
+
+    const onSignup = async (data: UserData) => {
+        try {
+            // Clear all form errors
+            setError("root", { type: "manual", message: "" })
+
             await signUp(data)
-            console.log("Signup completed successfully")
         } catch (err) {
-            console.error("Detailed signup error:", err)
-            console.error("Error stack:", err instanceof Error ? err.stack : "No stack trace")
-            setError(err instanceof Error ? err.message : "Failed to sign up")
+            if (err instanceof ApiError) {
+                setError("root", {
+                    type: "manual",
+                    message: err.message || "An error occurred. Please try again."
+                })
+            } else {
+                setError("root", {
+                    type: "manual",
+                    message: "An unexpected error occurred. Please try again."
+                })
+            }
         }
     }
 
@@ -96,11 +80,12 @@ export default function Signup() {
                     <ScrollView
                         contentContainerStyle={styles.scrollContainer}
                         keyboardShouldPersistTaps="handled"
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                        }
                     >
                         <View style={styles.formContainer}>
                             <Text style={styles.title}>Create Account</Text>
-
-                            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
                             {/* First Name Input */}
                             <Controller
@@ -174,9 +159,17 @@ export default function Signup() {
                                             autoCapitalize="none"
                                             editable={!formState.isSubmitting}
                                         />
-                                        {error && (
+                                        {error ? (
                                             <Text style={styles.errorText}>{error.message}</Text>
-                                        )}
+                                        ) : formState.errors.root &&
+                                          formState.errors.root.message &&
+                                          formState.errors.root.message.includes(
+                                              "already registered"
+                                          ) ? (
+                                            <Text style={styles.errorText}>
+                                                {formState.errors.root.message}
+                                            </Text>
+                                        ) : null}
                                     </View>
                                 )}
                             />
@@ -199,9 +192,17 @@ export default function Signup() {
                                             autoCapitalize="none"
                                             editable={!formState.isSubmitting}
                                         />
-                                        {error && (
+                                        {error ? (
                                             <Text style={styles.errorText}>{error.message}</Text>
-                                        )}
+                                        ) : formState.errors.root &&
+                                          formState.errors.root.message &&
+                                          formState.errors.root.message.includes(
+                                              "already taken"
+                                          ) ? (
+                                            <Text style={styles.errorText}>
+                                                {formState.errors.root.message}
+                                            </Text>
+                                        ) : null}
                                     </View>
                                 )}
                             />
@@ -290,10 +291,17 @@ export default function Signup() {
                             <TouchableOpacity
                                 style={styles.signupButton}
                                 onPress={handleSubmit(onSignup)}
-                                disabled={formState.isSubmitting}
+                                disabled={isPending}
                             >
                                 <Text style={styles.signupButtonText}>
-                                    {formState.isSubmitting ? "Creating Account..." : "Sign Up"}
+                                    {isPending ? (
+                                        <>
+                                            Creating Account...
+                                            <ActivityIndicator size="small" color="#0000ff" />
+                                        </>
+                                    ) : (
+                                        "Sign Up"
+                                    )}
                                 </Text>
                             </TouchableOpacity>
 
