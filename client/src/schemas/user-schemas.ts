@@ -37,15 +37,18 @@ export const signupSchema = userBaseSchema
     })
 
 export const userResponseSchema = z.object({
-    id: z.string(),
-    firstname: z.string(),
-    lastname: z.string(),
-    username: z.string(),
-    email: z.string(),
-    phone: z.string(),
-    type: z.string(),
-    avatarUrl: z.string(),
-    created_at: z.string()
+    success: z.boolean(),
+    data: z.object({
+        id: z.string(),
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string().email(),
+        username: z.string(),
+        phone: z.string().nullable(),
+        type: z.string(),
+        avatarUrl: z.string().url().nullable(),
+        createdAt: z.string().datetime()
+    })
 })
 
 export type UserData = z.infer<typeof signupSchema>

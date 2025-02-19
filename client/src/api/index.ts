@@ -30,20 +30,20 @@ api.interceptors.response.use(
         const statusCode = error.response?.status
 
         const detail = responseData.detail
-        const validationErrors = responseData.errors
+        const errors = responseData.errors
         const title = responseData.title
         const type = responseData.type
 
         let message = detail || title || "An error occurred"
+        let validationErrors: Record<string, string[]> | string[] | undefined
 
-        if (validationErrors) {
-            if (Array.isArray(validationErrors)) {
-                message = validationErrors.join(", ")
-            } else {
-                message = Object.entries(validationErrors)
-                    .flatMap(([field, errors]) => `${field}: ${(errors as string[]).join(", ")}`)
-                    .join("; ")
-            }
+        if (Array.isArray(errors)) {
+            validationErrors = errors
+            message = errors.join(", ")
+        } else if (typeof errors === "object") {
+            message = Object.entries(errors)
+                .flatMap(([field, errors]) => `${field}: ${(errors as string[]).join(", ")}`)
+                .join("; ")
         }
 
         // Create enhanced error

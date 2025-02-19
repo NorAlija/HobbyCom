@@ -13,7 +13,8 @@ export function useCreateUser() {
                 error.details?.includes("already exists"),
                 error.details?.includes("already registered"),
                 error.statusCode && [400, 422, 429].includes(error.statusCode),
-                error.type?.includes("validation-error") // Check error type
+                error.type?.includes("validation-error"), // Check error type
+                error.type?.includes("ValidationError") // Check error type
             ]
             if (noRetryConditions.some(Boolean)) {
                 return false
