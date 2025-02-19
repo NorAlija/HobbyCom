@@ -4,6 +4,7 @@ import { ApiError } from "@/utils/errors"
 import { Session, User } from "@supabase/supabase-js"
 import { useRouter, useSegments } from "expo-router"
 import { createContext, useContext, useEffect, useState } from "react"
+import { useToast } from "react-native-toast-notifications"
 import { supabase } from "../../lib/supabase"
 
 type AuthContextType = {
@@ -24,6 +25,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
     const router = useRouter()
     const segments = useSegments()
+    const toast = useToast()
 
     const { isPending, mutate: registerUser } = useCreateUser()
 
@@ -61,6 +63,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         return new Promise<void>((resolve, reject) => {
             registerUser(data, {
                 onSuccess: () => {
+                    toast.show("You have been successfully registered", {
+                        type: "success",
+                        placement: "top",
+                        duration: 5000
+                    })
                     resolve()
                 },
                 onError: (error: ApiError) => {

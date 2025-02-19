@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Stack } from "expo-router"
+import { ToastProvider } from "react-native-toast-notifications"
 import { AuthProvider } from "./providers/auth-providers"
 
 export default function RootLayout() {
@@ -12,19 +13,21 @@ export default function RootLayout() {
         }
     })
     return (
-        <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-                <Stack>
-                    <Stack.Screen
-                        name="(authentication)"
-                        options={{ headerShown: false, title: "Welcome" }}
-                    />
-                    <Stack.Screen
-                        name="(community)"
-                        options={{ headerShown: false, title: "Community" }}
-                    />
-                </Stack>
-            </AuthProvider>
-        </QueryClientProvider>
+        <ToastProvider>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <Stack>
+                        <Stack.Screen
+                            name="(authentication)"
+                            options={{ headerShown: false, title: "Welcome" }}
+                        />
+                        <Stack.Screen
+                            name="(community)"
+                            options={{ headerShown: false, title: "Community" }}
+                        />
+                    </Stack>
+                </AuthProvider>
+            </QueryClientProvider>
+        </ToastProvider>
     )
 }
