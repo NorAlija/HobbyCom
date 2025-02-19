@@ -12,7 +12,7 @@ const api = axios.create({
     timeout: 5000
 })
 
-// interscept errors from the backend
+// Axios intercepter. interscept errors from the backend
 api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {

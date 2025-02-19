@@ -10,7 +10,7 @@ export function useCreateUser() {
         // Don't retry for specific error conditions
         retry: (failureCount: number, error: ApiError) => {
             const noRetryConditions = [
-                error.details?.includes("already exists"),
+                error.details?.includes("already taken"),
                 error.details?.includes("already registered"),
                 error.statusCode && [400, 422, 429].includes(error.statusCode),
                 error.type?.includes("validation-error"), // Check error type

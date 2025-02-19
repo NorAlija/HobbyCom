@@ -14,7 +14,13 @@ const userBaseSchema = z.object({
         .string()
         .min(4, { message: "Username must be at least 4 characters long" })
         .regex(/^[a-zA-Z0-9]*$/, { message: "Username must contain only letters and numbers" }),
-    phone: z.string().nullable().optional(),
+    phone: z
+        .string()
+        .min(5, { message: "Phone number can't be less than 5 digits" })
+        .max(15, { message: "Phone number can't exceed 15 digits" })
+        .regex(/^[0-9]*$/, { message: "Phone number must contain only numbers" })
+        .nullable()
+        .optional(),
     type: z.string().default("USER"),
     avatarUrl: z.string().nullable().optional()
 })

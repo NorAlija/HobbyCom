@@ -226,9 +226,15 @@ export default function Signup() {
                                             keyboardType="phone-pad"
                                             editable={!formState.isSubmitting}
                                         />
-                                        {error && (
+                                        {error ? (
                                             <Text style={styles.errorText}>{error.message}</Text>
-                                        )}
+                                        ) : formState.errors.root &&
+                                          formState.errors.root.message &&
+                                          formState.errors.root.message.includes("Phone") ? (
+                                            <Text style={styles.errorText}>
+                                                {formState.errors.root.message}
+                                            </Text>
+                                        ) : null}
                                     </View>
                                 )}
                             />
