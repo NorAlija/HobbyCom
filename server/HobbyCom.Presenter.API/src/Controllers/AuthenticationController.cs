@@ -44,7 +44,7 @@ namespace HobbyCom.Presenter.API.src.Controllers
             var createdUser = await _authenticationService.CreateAsync(createUserDTO);
             return CreatedAtAction(
                 nameof(Create),
-                new { id = createdUser.Id },
+                new { id = createdUser.User?.Id },
                 new { success = true, data = createdUser }
                 );
         }

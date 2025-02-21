@@ -41,15 +41,24 @@ namespace HobbyCom.Presenter.API.src.Services
 
             return new GetUserInfoDTO
             {
-                Id = authResponse.User.Id != null ? Guid.Parse(authResponse.User.Id) : throw new Exception("User ID is null"),
-                FirstName = authResponse.User.UserMetadata["first_name"]?.ToString(),
-                LastName = authResponse.User.UserMetadata["last_name"]?.ToString(),
-                Email = authResponse.User.Email,
-                Username = authResponse.User.UserMetadata["username"]?.ToString(),
-                Phone = authResponse.User.UserMetadata["phone"]?.ToString(),
-                Type = authResponse.User.UserMetadata["type"]?.ToString(),
-                AvatarUrl = authResponse.User.UserMetadata["avatar_url"]?.ToString(),
-                CreatedAt = authResponse.User.CreatedAt
+                Access_token = authResponse.AccessToken,
+                Token_type = authResponse.TokenType,
+                Expires_in = authResponse.ExpiresIn,
+                Expires_at = authResponse.ExpiresAt().ToString("o"),
+                Expired = authResponse.Expired(),
+                Refresh_token = authResponse.RefreshToken,
+                User = new UserDTO
+                {
+                    Id = authResponse.User.Id != null ? Guid.Parse(authResponse.User.Id) : throw new Exception("User ID is null"),
+                    FirstName = authResponse.User.UserMetadata["first_name"]?.ToString(),
+                    LastName = authResponse.User.UserMetadata["last_name"]?.ToString(),
+                    Email = authResponse.User.Email,
+                    Username = authResponse.User.UserMetadata["username"]?.ToString(),
+                    Phone = authResponse.User.UserMetadata["phone"]?.ToString(),
+                    Type = authResponse.User.UserMetadata["type"]?.ToString(),
+                    AvatarUrl = authResponse.User.UserMetadata["avatar_url"].ToString(),
+                    CreatedAt = DateTime.UtcNow
+                }
             };
         }
 
@@ -93,6 +102,8 @@ namespace HobbyCom.Presenter.API.src.Services
                 signUpOptions
             );
 
+            // Console.WriteLine(authResponse?.User.);
+
             if (authResponse?.User == null)
             {
                 throw new Exception("Failed to create user in auth.users table.");
@@ -104,15 +115,24 @@ namespace HobbyCom.Presenter.API.src.Services
 
             return new GetUserInfoDTO
             {
-                Id = authResponse.User.Id != null ? Guid.Parse(authResponse.User.Id) : throw new Exception("User ID is null"),
-                FirstName = createUserDTO.Firstname,
-                LastName = createUserDTO.Lastname,
-                Email = createUserDTO.Email,
-                Username = createUserDTO.Username,
-                Phone = createUserDTO.Phone,
-                Type = "USER",
-                AvatarUrl = signUpOptions.Data["avatar_url"].ToString(),
-                CreatedAt = DateTime.UtcNow
+                Access_token = authResponse.AccessToken,
+                Token_type = authResponse.TokenType,
+                Expires_in = authResponse.ExpiresIn,
+                Expires_at = authResponse.ExpiresAt().ToString("o"),
+                Expired = authResponse.Expired(),
+                Refresh_token = authResponse.RefreshToken,
+                User = new UserDTO
+                {
+                    Id = authResponse.User.Id != null ? Guid.Parse(authResponse.User.Id) : throw new Exception("User ID is null"),
+                    FirstName = authResponse.User.UserMetadata["first_name"]?.ToString(),
+                    LastName = authResponse.User.UserMetadata["last_name"]?.ToString(),
+                    Email = authResponse.User.Email,
+                    Username = authResponse.User.UserMetadata["username"]?.ToString(),
+                    Phone = authResponse.User.UserMetadata["phone"]?.ToString(),
+                    Type = authResponse.User.UserMetadata["type"]?.ToString(),
+                    AvatarUrl = authResponse.User.UserMetadata["avatar_url"].ToString(),
+                    CreatedAt = DateTime.UtcNow
+                }
             };
         }
     }

@@ -28,15 +28,18 @@ namespace HobbyCom.Presenter.API.src.Services
             }
             return Task.FromResult(new GetUserInfoDTO
             {
-                Id = loggedInUser.Id != null ? Guid.Parse(loggedInUser.Id) : throw new Exception("User ID is null"),
-                FirstName = loggedInUser.UserMetadata["first_name"]?.ToString(),
-                LastName = loggedInUser.UserMetadata["last_name"]?.ToString(),
-                Email = loggedInUser.Email,
-                Username = loggedInUser.UserMetadata["username"]?.ToString(),
-                Phone = loggedInUser.UserMetadata["phone"]?.ToString(),
-                Type = loggedInUser.UserMetadata["type"]?.ToString(),
-                AvatarUrl = loggedInUser.UserMetadata["avatar_url"]?.ToString(),
-                CreatedAt = loggedInUser.CreatedAt
+                User = new UserDTO
+                {
+                    Id = loggedInUser.Id != null ? Guid.Parse(loggedInUser.Id) : throw new Exception("User ID is null"),
+                    FirstName = loggedInUser.UserMetadata["first_name"]?.ToString(),
+                    LastName = loggedInUser.UserMetadata["last_name"]?.ToString(),
+                    Email = loggedInUser.Email,
+                    Username = loggedInUser.UserMetadata["username"]?.ToString(),
+                    Phone = loggedInUser.UserMetadata["phone"]?.ToString(),
+                    Type = loggedInUser.UserMetadata["type"]?.ToString(),
+                    AvatarUrl = loggedInUser.UserMetadata["avatar_url"].ToString(),
+                    CreatedAt = loggedInUser.CreatedAt
+                }
             });
         }
     }
