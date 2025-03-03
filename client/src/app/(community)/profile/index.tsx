@@ -1,11 +1,11 @@
-import React, { useState } from "react"
+import React from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useAuth } from "../../providers/auth-providers"
 
 const Profile = () => {
-    const { signOut, user } = useAuth()
+    const { signOut /*user*/ } = useAuth()
     // const [firstName, setFirstName] = useState("")
-    const [loading, setLoading] = useState(true)
+    // const [loading, setLoading] = useState(true)
 
     // useEffect(() => {
     //     fetchProfile()
@@ -43,7 +43,7 @@ const Profile = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.name}>{user?.firstname || "User"}</Text>
+            <Text style={styles.name}>{/*user?.firstname ||*/ "User"}</Text>
             <TouchableOpacity onPress={signOut} style={styles.button}>
                 <Text style={styles.buttonText}>Sign Out</Text>
             </TouchableOpacity>

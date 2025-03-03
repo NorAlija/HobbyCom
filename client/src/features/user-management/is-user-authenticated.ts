@@ -1,4 +1,4 @@
-import { RefreshTokenRequest } from "@/types"
+// import { RefreshTokenRequest } from "@/types"
 import { LoggedInEmailKey } from "@/utils/constants"
 import { ApiError } from "@/utils/errors"
 import { isTokenExpired } from "@/utils/jwt-decode"
@@ -20,7 +20,8 @@ const TOKEN_LIFETIME = 58 * 60 * 1000 // 58  minutes
 
 // export function useIsAuth() {
 export function useIsAuth(options?: UseIsAuthOptions) {
-    const { getAccessToken, getRefreshToken, clearTokens, setTokens, getLoggedInEmail } = useToken()
+    const { getAccessToken, getRefreshToken, clearTokens, /*setTokens,*/ getLoggedInEmail } =
+        useToken()
     const { mutate: logout } = useLogout()
 
     const checkAuthState = useCallback(async (): Promise<AuthState> => {
@@ -35,11 +36,11 @@ export function useIsAuth(options?: UseIsAuthOptions) {
             return { isAuthenticated: false }
         }
 
-        const refreshObject: RefreshTokenRequest = {
-            email,
-            refreshToken,
-            accessToken
-        }
+        // const refreshObject: RefreshTokenRequest = {
+        //     email,
+        //     refreshToken,
+        //     accessToken
+        // }
 
         // if (isTokenExpired(token, PROACTIVE_BUFFER)) {
         if (isTokenExpired(accessToken)) {

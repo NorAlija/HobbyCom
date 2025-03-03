@@ -2,15 +2,15 @@ import { useCreateUser } from "@/features/user-management/create-user"
 import { useIsAuth } from "@/features/user-management/is-user-authenticated"
 import { useLogin } from "@/features/user-management/login-user"
 import { useLogout } from "@/features/user-management/logout-user"
-import { LoginInput, SignUpData, User } from "@/types"
+import { LoginInput, SignUpData /*User*/ } from "@/types"
 import { ApiError } from "@/utils/errors"
 import { useRouter, useSegments } from "expo-router"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect /*useState*/ } from "react"
 import { ActivityIndicator, View } from "react-native"
 import { useToast } from "react-native-toast-notifications"
 
 type AuthContextType = {
-    user: User | null
+    // user: User | null
     isAuthenticated: boolean
     isAuthLoading: boolean
     isSigningUp: boolean
@@ -23,7 +23,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null)
+    // const [user, setUser] = useState<User | null>(null)
     const router = useRouter()
     const segments = useSegments()
     const toast = useToast()
@@ -94,7 +94,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
         <AuthContext.Provider
             value={{
-                user,
+                // user,
                 isAuthenticated,
                 isAuthLoading,
                 isSigningUp,
