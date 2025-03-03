@@ -2,7 +2,7 @@ import authService from "@/api/services/auth-service"
 import { LoginInput, UserResponse } from "@/types"
 import { LoggedInEmailKey } from "@/utils/constants"
 import { ApiError } from "@/utils/errors"
-import { removeItem, setItem } from "@/utils/scureStorage"
+import { setItem } from "@/utils/scureStorage"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "react-native-toast-notifications"
 import { useToken } from "../token-management/tokens"
@@ -30,7 +30,6 @@ export function useLogin() {
         },
 
         onSuccess: async (data) => {
-            await removeItem(LoggedInEmailKey)
             await clearTokens()
 
             const AccessToken = data.data.access_token
