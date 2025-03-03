@@ -1,50 +1,49 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
-import { supabase } from "../../../lib/supabase"
 import { useAuth } from "../../providers/auth-providers"
 
 const Profile = () => {
     const { signOut, user } = useAuth()
-    const [firstName, setFirstName] = useState("")
+    // const [firstName, setFirstName] = useState("")
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        fetchProfile()
-    }, [user])
+    // useEffect(() => {
+    //     fetchProfile()
+    // }, [user])
 
-    const fetchProfile = async () => {
-        try {
-            if (!user) return
+    // const fetchProfile = async () => {
+    //     try {
+    //         if (!user) return
 
-            const { data, error } = await supabase
-                .from("profiles")
-                .select("first_name")
-                .eq("user_id", user.id)
-                .single()
+    //         const { data, error } = await supabase
+    //             .from("profiles")
+    //             .select("first_name")
+    //             .eq("user_id", user.id)
+    //             .single()
 
-            if (error) {
-                console.error("Error fetching profile:", error)
-            } else if (data) {
-                setFirstName(data.first_name || "")
-            }
-        } catch (error) {
-            console.error("Error:", error)
-        } finally {
-            setLoading(false)
-        }
-    }
+    //         if (error) {
+    //             console.error("Error fetching profile:", error)
+    //         } else if (data) {
+    //             setFirstName(data.first_name || "")
+    //         }
+    //     } catch (error) {
+    //         console.error("Error:", error)
+    //     } finally {
+    //         setLoading(false)
+    //     }
+    // }
 
-    if (loading) {
-        return (
-            <View style={styles.container}>
-                <Text>Loading...</Text>
-            </View>
-        )
-    }
+    // if (loading) {
+    //     return (
+    //         <View style={styles.container}>
+    //             <Text>Loading...</Text>
+    //         </View>
+    //     )
+    // }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.name}>{firstName || "User"}</Text>
+            <Text style={styles.name}>{user?.firstname || "User"}</Text>
             <TouchableOpacity onPress={signOut} style={styles.button}>
                 <Text style={styles.buttonText}>Sign Out</Text>
             </TouchableOpacity>

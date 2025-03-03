@@ -1,6 +1,8 @@
-import { signupSchema, UserData } from "@/schemas/user-schemas"
+import { signupSchema } from "@/schemas/user-schemas"
+import { UserData } from "@/types"
 import { ApiError } from "@/utils/errors"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "expo-router"
 import React from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -23,8 +25,9 @@ import { useAuth } from "../providers/auth-providers"
 
 export default function Signup() {
     const router = useRouter()
-    const { signUp, isPending } = useAuth()
+    const { signUp, isSigningUp } = useAuth()
     const [refreshing, setRefreshing] = React.useState(false)
+    const queryClient = useQueryClient()
 
     const { control, handleSubmit, formState, setError, reset } = useForm({
         resolver: zodResolver(signupSchema),
@@ -40,7 +43,9 @@ export default function Signup() {
         mode: "onChange"
     })
 
-    const onRefresh = React.useCallback(() => {
+    const onRefresh = React.useCallback(async () => {
+        await queryClient.invalidateQueries({ queryKey: ["auth"] })
+
         setRefreshing(true)
         setTimeout(() => {
             setRefreshing(false)
@@ -297,12 +302,12 @@ export default function Signup() {
                             <TouchableOpacity
                                 style={styles.signupButton}
                                 onPress={handleSubmit(onSignup)}
-                                disabled={isPending}
+                                disabled={isSigningUp}
                             >
                                 <Text style={styles.signupButtonText}>
-                                    {isPending ? (
+                                    {isSigningUp ? (
                                         <>
-                                            Creating Account...
+                                            {/* Creating Account... */}
                                             <ActivityIndicator size="small" color="#0000ff" />
                                         </>
                                     ) : (

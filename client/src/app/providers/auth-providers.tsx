@@ -1,108 +1,116 @@
-import { useCreateUser } from "@/features/user-management/useCreateUser"
-import { SignUpData } from "@/types"
+import { useCreateUser } from "@/features/user-management/create-user"
+import { useIsAuth } from "@/features/user-management/is-user-authenticated"
+import { useLogin } from "@/features/user-management/login-user"
+import { useLogout } from "@/features/user-management/logout-user"
+import { LoginInput, SignUpData, User } from "@/types"
 import { ApiError } from "@/utils/errors"
-import { Session, User } from "@supabase/supabase-js"
 import { useRouter, useSegments } from "expo-router"
 import { createContext, useContext, useEffect, useState } from "react"
+import { ActivityIndicator, View } from "react-native"
 import { useToast } from "react-native-toast-notifications"
-import { supabase } from "../../lib/supabase"
 
 type AuthContextType = {
     user: User | null
-    session: Session | null
-    loading: boolean
-    isPending: boolean
+    isAuthenticated: boolean
+    isAuthLoading: boolean
+    isSigningUp: boolean
+    isSigningIn: boolean
     signUp: (data: SignUpData) => Promise<void>
-    signIn: (email: string, password: string) => Promise<void>
     signOut: () => Promise<void>
+    signIn: (data: LoginInput) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
-    const [session, setSession] = useState<Session | null>(null)
-    const [loading, setLoading] = useState(true)
     const router = useRouter()
     const segments = useSegments()
     const toast = useToast()
 
-    const { isPending, mutate: registerUser } = useCreateUser()
+    const { mutateAsync: logoutMutation } = useLogout()
+
+    const { isPending: isSigningUp, mutate: registerUser } = useCreateUser()
+    const { isPending: isSigningIn, mutate: loginUser } = useLogin()
+
+    const { data: authState, isLoading: isAuthLoading } = useIsAuth()
+
+    const isAuthenticated = authState?.isAuthenticated ?? false
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session)
-            setUser(session?.user ?? null)
-            setLoading(false)
-        })
+        if (isAuthLoading || !authState) return
 
-        const {
-            data: { subscription }
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session)
-            setUser(session?.user ?? null)
-            setLoading(false)
-        })
+        const routeGroup = segments[0] ?? "(authentication)"
+        const shouldAuth = !authState.isAuthenticated // should authenticate if isAuthenticated is false
+        const isAuthRoute = routeGroup === "(authentication)"
 
-        return () => subscription.unsubscribe()
-    }, [])
-
-    useEffect(() => {
-        if (loading) return
-
-        const inAuthGroup = segments[0] === "(authentication)"
-
-        if (!user && !inAuthGroup) {
+        if (shouldAuth && !isAuthRoute) {
             router.replace("/(authentication)")
-        } else if (user && inAuthGroup) {
+        } else if (!shouldAuth && isAuthRoute) {
             router.replace("/(community)")
         }
-    }, [user, loading, segments])
+    }, [authState, isAuthLoading, segments, router])
 
     const signUp = async (data: SignUpData) => {
         return new Promise<void>((resolve, reject) => {
             registerUser(data, {
                 onSuccess: () => {
-                    toast.show("You have been successfully registered", {
-                        type: "success",
-                        placement: "top",
-                        duration: 5000
-                    })
                     resolve()
                 },
                 onError: (error: ApiError) => {
+                    toast.show("Registration failed", {
+                        type: "danger",
+                        placement: "top",
+                        duration: 2000
+                    })
                     reject(error)
                 }
             })
         })
     }
 
-    const signIn = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password
+    const signIn = async (data: LoginInput) => {
+        return new Promise<void>((resolve, reject) => {
+            loginUser(data, {
+                onSuccess: () => {
+                    resolve()
+                },
+                onError: (error: ApiError) => {
+                    toast.show("Login failed", {
+                        type: "danger",
+                        placement: "top",
+                        duration: 2000
+                    })
+                    reject(error)
+                }
+            })
         })
-        if (error) throw error
     }
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
+        await logoutMutation()
     }
 
     return (
         <AuthContext.Provider
             value={{
                 user,
-                session,
-                loading,
-                isPending,
+                isAuthenticated,
+                isAuthLoading,
+                isSigningUp,
+                isSigningIn,
                 signUp,
-                signIn,
-                signOut
+                signOut,
+                signIn
             }}
         >
-            {children}
+            {isAuthLoading ? (
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <ActivityIndicator size="large" />
+                </View>
+            ) : (
+                children
+            )}
         </AuthContext.Provider>
     )
 }

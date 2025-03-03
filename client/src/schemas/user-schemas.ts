@@ -20,7 +20,8 @@ const userBaseSchema = z.object({
         .max(15, { message: "Phone number can't exceed 15 digits" })
         .regex(/^[0-9]*$/, { message: "Phone number must contain only numbers" })
         .nullable()
-        .optional(),
+        .optional()
+        .or(z.literal(null)),
     type: z.string().default("USER"),
     avatarUrl: z.string().nullable().optional()
 })
@@ -42,20 +43,27 @@ export const signupSchema = userBaseSchema
         path: ["confirmPassword"]
     })
 
+const userSchema = z.object({
+    id: z.string(),
+    firstName: z.string().nullable(),
+    lastName: z.string().nullable(),
+    email: z.string().email(),
+    username: z.string().nullable(),
+    phone: z.string().nullable(),
+    type: z.string().nullable(),
+    avatarUrl: z.string().url().nullable(),
+    createdAt: z.string().datetime()
+})
+
 export const userResponseSchema = z.object({
     success: z.boolean(),
     data: z.object({
-        id: z.string(),
-        firstName: z.string(),
-        lastName: z.string(),
-        email: z.string().email(),
-        username: z.string(),
-        phone: z.string().nullable(),
-        type: z.string(),
-        avatarUrl: z.string().url().nullable(),
-        createdAt: z.string().datetime()
+        access_token: z.string(),
+        token_type: z.string(),
+        expires_in: z.number(),
+        expires_at: z.string().datetime({ offset: true }),
+        expired: z.boolean(),
+        refresh_token: z.string(),
+        user: userSchema
     })
 })
-
-export type UserData = z.infer<typeof signupSchema>
-export type UserResponse = z.infer<typeof userResponseSchema>

@@ -1,3 +1,4 @@
+import { useToken } from "@/features/token-management/tokens"
 import { ApiError } from "@/utils/errors"
 import getBaseURL from "@/utils/getBaseURL"
 import axios, { AxiosError } from "axios"
@@ -11,6 +12,22 @@ const api = axios.create({
     },
     timeout: 5000
 })
+
+const { getAccessToken } = useToken()
+
+// authorization interceptor
+api.interceptors.request.use(
+    async (config) => {
+        const accessToken = await getAccessToken()
+        if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`
+        }
+        return config
+    },
+    (error) => {
+        return Promise.reject(error)
+    }
+)
 
 // Axios intercepter. interscept errors from the backend
 api.interceptors.response.use(

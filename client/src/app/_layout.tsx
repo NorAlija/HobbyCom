@@ -16,7 +16,7 @@ export default function RootLayout() {
         <ToastProvider>
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>
-                    <Stack>
+                    <Stack screenOptions={{ headerShown: false }}>
                         <Stack.Screen
                             name="(authentication)"
                             options={{ headerShown: false, title: "Welcome" }}

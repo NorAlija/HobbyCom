@@ -6,7 +6,7 @@ import api from ".."
 
 const userServices: UserService = {
     AddOne: async (userData) => {
-        const response = await api.post("/authentication/signup", userData)
+        const response = await api.post("/authentications/signup", userData)
         const validatedResponseData = userResponseSchema.safeParse(response.data)
 
         if (!validatedResponseData.success) {
