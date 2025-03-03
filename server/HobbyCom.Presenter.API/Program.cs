@@ -9,8 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(options =>
 {
-    options.Conventions.Add(new RouteTokenTransformerConvention(
-        new SlugifyParameterTransformer())); // Converts route names to lowercase, kebab-case
+    options.Conventions.Add(new RouteTokenTransformerConvention(new SpinCaseTransformer()));
 });
 
 // Register all project dependencies
@@ -43,24 +42,43 @@ builder.Services.ConfigureSwaggerGen(setup =>
             setup.IncludeXmlComments(xmlPath);
         }
     }
+
+    setup.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"JWT Authorization header using the Bearer scheme. 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      Example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        // Scheme = JwtBearerDefaults.AuthenticationScheme
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+
+    // Apply the security scheme globally
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "Bearer",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+
+            },
+            new List<string>()
+        }
+    });
 });
 
 builder.Services.AddRouting();
 
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy(
-//         "AllowOrigin",
-//         builder =>
-//         {
-//             builder
-//                 .SetIsOriginAllowed(_ => true)  // Allow any origin in development
-//                 .AllowAnyMethod()
-//                 .AllowAnyHeader()
-//                 .AllowCredentials();
-//         }
-//     );
-// });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policyBuilder =>
@@ -95,12 +113,12 @@ if (app.Environment.IsDevelopment())
     }).ExcludeFromDescription();
 }
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
 // app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseRouting();
 app.UseCors("AllowFrontend");
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
 

@@ -1,4 +1,5 @@
 using HobbyCom.Application.src.IServices;
+using HobbyCom.Application.src.Services;
 using HobbyCom.Presenter.API.src.Services;
 using HobbyCom.Domain.src.IRepositories;
 using HobbyCom.Infrastructure.src.Databases;
@@ -10,6 +11,7 @@ using Supabase;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Net.Http.Headers;
 
 namespace HobbyCom.Presenter.API
 {
@@ -25,7 +27,24 @@ namespace HobbyCom.Presenter.API
 
             RegisterMiddlewares(services);
 
+            RegisterHttpClients(services, configuration);
+
             return services;
+        }
+
+        private static void RegisterHttpClients(IServiceCollection services, IConfiguration configuration)
+        {
+            // Configure named HttpClient for Supabase
+            services.AddHttpClient("SupabaseClient", client =>
+            {
+                client.BaseAddress = new Uri(configuration["Supabase:Url"] ?? throw new ArgumentNullException("Supabase:Url"));
+                client.DefaultRequestHeaders.Add("apikey", configuration["Supabase:Key"]);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            // Register IHttpClientFactory
+            services.AddHttpClient();
         }
 
         private static void RegisterAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -40,7 +59,7 @@ namespace HobbyCom.Presenter.API
                 opts.TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey = new SymmetricSecurityKey(bytes),
-                    ValidIssuer = configuration["Authentication:ValidIssuer"],
+                    ValidIssuer = configuration["Authentication:ValidIssuer2"],
                     ValidAudience = configuration["Authentication:ValidAudience"],
                 };
             });
@@ -87,7 +106,7 @@ namespace HobbyCom.Presenter.API
                     key,
                     new SupabaseOptions
                     {
-                        AutoRefreshToken = true,
+                        AutoRefreshToken = false,
                         AutoConnectRealtime = true
                     });
             });

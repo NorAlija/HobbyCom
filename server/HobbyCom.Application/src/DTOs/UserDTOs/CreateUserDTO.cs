@@ -20,7 +20,8 @@ namespace HobbyCom.Application.src.DTOs.UserDTOs
         [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "Username must contain only letters and numbers.")]
         public string? Username { get; set; }
 
-        [MaxLength(50)]
+        [MinLength(5, ErrorMessage = "Phone number can't be less than 5 digits")]
+        [MaxLength(15, ErrorMessage = "Phone number can't exceed 15 digits")]
         [Phone]
         public string? Phone { get; set; }
 

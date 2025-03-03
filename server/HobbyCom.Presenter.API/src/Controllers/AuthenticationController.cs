@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using HobbyCom.Application.src.DTOs.UserDTOs;
 using HobbyCom.Application.src.IServices;
+using System.Security.Claims;
+using HobbyCom.Presenter.API.src.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HobbyCom.Presenter.API.src.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]s")]
+    // [Route("/api/v1/authentications")]
     public class AuthenticationController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
@@ -18,17 +22,10 @@ namespace HobbyCom.Presenter.API.src.Controllers
             _userService = userService;
         }
 
-        /// <summary>
-        /// Sign up a new user
-        /// </summary>
-        /// <param name="createUserDTO">User registration details</param>
-        /// <returns>Created user information</returns>
-        /// <response code="201">User successfully created</response>
-        /// <response code="400">Invalid user details</response>
-        /// <response code="500">Internal server error</response>
         [HttpPost("signup")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GetUserInfoDTO>> Create([FromBody] CreateUserDTO createUserDTO)
         {
@@ -49,16 +46,6 @@ namespace HobbyCom.Presenter.API.src.Controllers
                 );
         }
 
-        /// <summary>
-        /// Login a user
-        /// </summary>
-        /// <param name="loginUserDTO">User login details</param>
-        /// <returns>Logged in user information</returns>
-        /// <response code="200">User successfully logged in</response>
-        /// <response code="400">Invalid login details</response>
-        /// <response code="401">Unauthorized access</response>
-        /// <response code="404">User not found</response>
-        /// <response code="500">Internal server error</response>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,32 +54,66 @@ namespace HobbyCom.Presenter.API.src.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GetUserInfoDTO>> Login([FromBody] LoginUserDTO loginUserDTO)
         {
-            // if (!ModelState.IsValid)
-            // {
-            //     var errors = ModelState
-            //         .Where(x => x.Value?.Errors.Count > 0)
-            //         .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
-            //         .ToList();
-            //     return BadRequest(new { success = false, errors });
-            // }
 
             var loggedInUser = await _authenticationService.LoginAsync(loginUserDTO);
             return Ok(new { success = true, data = loggedInUser });
         }
 
-        /// <summary>
-        /// Logout a user
-        /// </summary>
-        /// <returns>Task</returns>
-        /// <response code="200">User successfully logged out</response>
-        /// <response code="500">Internal server error</response>
+        [Authorize]
         [HttpPost("logout")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
         {
-            await _authenticationService.LogoutAsync();
+            if (string.IsNullOrEmpty(dto.Email))
+            {
+                return BadRequest(new { success = false, error = "Email is required" });
+            }
+
+            Console.WriteLine("Email: ", dto.Email);
+            await _authenticationService.LogoutAsync(dto.Email);
             return Ok(new { success = true, data = "Successfully logged out" });
+        }
+
+        /// <summary>
+        /// Fetches a new access token and refresh token using the refresh token
+        /// </summary>
+        /// <returns>Task</returns>
+        /// <response code="200">Token successfully refreshed</response>
+        /// <response code="401">Invalid refresh token</response>
+        /// <response code="500">Internal server error</response>
+        [HttpPost("refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<TokenDTO>> Refresh([FromBody] TokenDTO tokens)
+        {
+            var principal = _authenticationService.GetPrincipalFromExpiredToken(tokens.AccessToken!);
+
+            if (principal?.Identity is not ClaimsIdentity identity)
+                return Unauthorized();
+            var userIdClaim = identity.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
+            var userId = Guid.Parse(userIdClaim.Value);
+            if (userId == Guid.Empty)
+                return Unauthorized();
+            var userEmail = await _userService.GetUserEmailByIdAsync(userId);
+            if (userEmail != tokens.Email)
+            {
+                return Unauthorized();
+            }
+
+            if (string.IsNullOrEmpty(tokens.RefreshToken))
+            {
+                return Unauthorized();
+            }
+
+            var refreshedUser = await _authenticationService.RefreshTokenAsync(tokens.RefreshToken);
+            return Ok(new { success = true, data = refreshedUser });
         }
     }
 }
