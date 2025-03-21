@@ -6,14 +6,21 @@
     }
   },
   "ConnectionStrings": {
-      "DefaultConnection": "User Id=xx;Password=xx;Server=xxx;Port=xxx;Database=postgres"
+      "SessionConnection": "User Id=xx;Password=xx;Server=xxx;Port=xxx;Database=postgres"
   },
   "Supabase": {
     "Url": "YOUR_SUPABASE_URL",
     "Key": "YOUR_SUPABASE_KEY",
   },
+   "Authentication": {
+    "ValidIssuer": "yourIssuer",
+    "ValidIssuer2": "Issuer",
+    "ValidAudience": "yourAudience",
+    "JwtSecret": "this is a seceret from supabase. you might not need it if using different database provider"
+  },
     "Jwt": {
     "Key": "-----BEGIN RSA PRIVATE KEY----------END RSA PRIVATE KEY-----",
     "PublicKey": "-----BEGIN PUBLIC KEY----------END PUBLIC KEY-----"
   },
+  "AllowedOrigins": ["yourMachineIP:5050", "http://localhost:5050"]
 }
