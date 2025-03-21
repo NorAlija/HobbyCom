@@ -1,6 +1,6 @@
 namespace HobbyCom.Domain.src.Entities
 {
-    public class Hobby : BaseModel
+    public class Hobby : BaseEntity
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
