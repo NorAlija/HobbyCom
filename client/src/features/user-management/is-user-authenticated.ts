@@ -6,6 +6,7 @@ import { isTokenExpired } from "@/utils/jwt-decode"
 import { removeItem } from "@/utils/scureStorage"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
+import { useToast } from "react-native-toast-notifications"
 import { useToken } from "../token-management/tokens"
 import { useLogout } from "./logout-user"
 
@@ -24,6 +25,7 @@ const TOKEN_LIFETIME = 30 * 1000
 export function useIsAuth(options?: UseIsAuthOptions) {
     const { getAccessToken, getRefreshToken, clearTokens, setTokens, getLoggedInEmail } = useToken()
     const { mutateAsync: logout } = useLogout()
+    const toast = useToast()
 
     const checkAuthState = useCallback(async (): Promise<AuthState> => {
         const [accessToken, refreshToken, email] = await Promise.all([
@@ -53,7 +55,18 @@ export function useIsAuth(options?: UseIsAuthOptions) {
                 return { isAuthenticated: true }
             } catch (error) {
                 console.error("Failed to refresh token", error)
-                await logout()
+                toast.show("Failed to refresh token", {
+                    type: "danger",
+                    placement: "top",
+                    duration: 2000
+                })
+                //TODO: if there is no access token, clear the tokens and set isAuthenticated to false
+                //TODO: check if the token has a session associated with it, if not, clear the tokens and set isAuthenticated to false
+                //TODO: if the token has a session try to inavalidate the auth state to try and refresh the token again
+                //TODO: if the refresh token is invalid, clear the tokens and set isAuthenticated to false
+                //Todo: if thhere is no session associated with the token, clear the tokens and set isAuthenticated to false
+
+                // await logout()
                 await clearTokens()
                 removeItem(LoggedInEmailKey)
                 return { isAuthenticated: false }
