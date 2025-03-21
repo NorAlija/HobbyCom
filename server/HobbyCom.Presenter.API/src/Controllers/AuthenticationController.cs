@@ -67,12 +67,11 @@ namespace HobbyCom.Presenter.API.src.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
         {
+            Console.WriteLine("Logout Email: " + dto.Email);
             if (string.IsNullOrEmpty(dto.Email))
             {
                 return BadRequest(new { success = false, error = "Email is required" });
             }
-
-            Console.WriteLine("Email: ", dto.Email);
             await _authenticationService.LogoutAsync(dto.Email);
             return Ok(new { success = true, data = "Successfully logged out" });
         }

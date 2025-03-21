@@ -51,6 +51,36 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [authState, isAuthLoading, segments, router])
 
+    // useEffect(() => {
+    //     supabase.auth.getSession().then(({ data: { session } }) => {
+    //         setSession(session)
+    //         setUser(session?.user ?? null)
+    //         setLoading(false)
+    //     })
+
+    //     const {
+    //         data: { subscription }
+    //     } = supabase.auth.onAuthStateChange((_event, session) => {
+    //         setSession(session)
+    //         setUser(session?.user ?? null)
+    //         setLoading(false)
+    //     })
+
+    //     return () => subscription.unsubscribe()
+    // }, [])
+
+    // useEffect(() => {
+    //     if (loading) return
+
+    //     const inAuthGroup = segments[0] === "(authentication)"
+
+    //     if (!user && !inAuthGroup) {
+    //         router.replace("/(authentication)")
+    //     } else if (user && inAuthGroup) {
+    //         router.replace("/(community)")
+    //     }
+    // }, [user, loading, segments])
+
     const signUp = async (data: SignUpData) => {
         return new Promise<void>((resolve, reject) => {
             registerUser(data, {
@@ -88,6 +118,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const signOut = async () => {
+        // const { error } = await supabase.auth.signOut()
+        // if (error) throw error
         await logoutMutation()
     }
 

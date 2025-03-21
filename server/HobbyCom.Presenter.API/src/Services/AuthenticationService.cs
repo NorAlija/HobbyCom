@@ -39,7 +39,7 @@ namespace HobbyCom.Presenter.API.src.Services
                 throw new Exception("User is not signed in with the provided email.");
             }
 
-            Console.WriteLine("signedInUser: ", signedInUser.Email, "email: ", email);
+            Console.WriteLine("signedInUser: " + signedInUser.Email + ", email: " + email);
 
             await _supabaseClient.Auth.SignOut();
             return true;
@@ -61,7 +61,8 @@ namespace HobbyCom.Presenter.API.src.Services
             {
                 throw new Exception("Incorrect email or password.");
             }
-
+            var currentSession = _supabaseClient.Auth.CurrentSession;
+            Console.WriteLine("currentSession: " + currentSession?.AccessToken);
             var expiresAt = authResponse.ExpiresAt();
 
             // Force UTC formatting (if not already UTC)
