@@ -35,8 +35,8 @@ export default function Signup() {
             firstName: "",
             lastName: "",
             email: "",
-            userName: "",
-            phoneNumber: "",
+            username: "",
+            phone: "",
             password: "",
             confirmPassword: ""
         },
@@ -181,7 +181,7 @@ export default function Signup() {
                             {/* Username Input */}
                             <Controller
                                 control={control}
-                                name="userName"
+                                name="username"
                                 render={({
                                     field: { value, onChange, onBlur },
                                     fieldState: { error }
@@ -215,7 +215,7 @@ export default function Signup() {
                             {/* Phone Number Input (Optional) */}
                             <Controller
                                 control={control}
-                                name="phoneNumber"
+                                name="phone"
                                 render={({
                                     field: { value, onChange, onBlur },
                                     fieldState: { error }

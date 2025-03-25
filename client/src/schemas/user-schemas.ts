@@ -10,11 +10,11 @@ const userBaseSchema = z.object({
         .min(2, { message: "Lastname must be at least 2 characters long" })
         .max(50, { message: "Lastname must not exceed 50 characters" }),
     email: z.string().email({ message: "Invalid email address" }),
-    userName: z
+    username: z
         .string()
         .min(4, { message: "Username must be at least 4 characters long" })
         .regex(/^[a-zA-Z0-9]*$/, { message: "Username must contain only letters and numbers" }),
-    phoneNumber: z.preprocess(
+    phone: z.preprocess(
         (val) => (val === "" ? null : val),
         z
             .string()
@@ -25,11 +25,11 @@ const userBaseSchema = z.object({
             .optional()
     ),
     role: z.string().default("USER"),
-    profilePicture: z.string().nullable().optional()
+    avatarUrl: z.string().nullable().optional()
 })
 
 export const signupSchema = userBaseSchema
-    .omit({ role: true, profilePicture: true })
+    .omit({ role: true, avatarUrl: true })
     .extend({
         password: z
             .string()
@@ -50,9 +50,9 @@ export const userSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     email: z.string().email(),
-    userName: z.string().nullable(),
-    phoneNumber: z.string().nullable(),
-    profilePicture: z.string().url().nullable(),
+    username: z.string().nullable(),
+    phone: z.string().nullable(),
+    avatarUrl: z.string().url().nullable(),
     role: z.string(),
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),

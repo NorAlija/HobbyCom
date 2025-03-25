@@ -29,9 +29,9 @@ export type User = {
     firstName: string
     lastName: string
     email: string
-    userName: string | null
-    phoneNumber: string | null
-    profilePicture: string | null
+    username: string
+    phone?: string | null
+    avatarUrl?: string | null
     role: string
     createdAt: string
     updatedAt: string
@@ -56,20 +56,8 @@ export type Token = {
     id: string
 }
 
-export type SignupUser = {
-    id: UserId
-    firstName: string
-    lastName: string
-    email: string
-    userName: string
-    phoneNumber?: string | null
-    role?: string
-    profilePicture?: string | null
-    createdAt: string
-}
-
 export interface SignUpData
-    extends Omit<SignupUser, "id" | "role" | "profilePicture" | "createdAt"> {
+    extends Omit<User, "id" | "role" | "avatarUrl" | "createdAt" | "updatedAt"> {
     password: string
     confirmPassword: string
 }
