@@ -20,7 +20,7 @@ namespace HobbyCom.Application.src.DTOs
 
     public abstract class BaseReadDto<T> : BaseEntity where T : BaseEntity
     {
-        public abstract BaseReadDto<T> FromEntity(T entity); // Transforms DTO into a new entity
+        public abstract BaseReadDto<T> FromEntity(T entity); // Transforms an entity into a DTO
     }
 
 }
