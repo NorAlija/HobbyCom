@@ -1,3 +1,4 @@
+using HobbyCom.Application.src.DTOs.SessionDTOs;
 using HobbyCom.Domain.src.Entities;
 
 namespace HobbyCom.Application.src.DTOs.UserDTOs
@@ -10,10 +11,11 @@ namespace HobbyCom.Application.src.DTOs.UserDTOs
         public string? Username { get; set; }
         public string? Phone { get; set; }
         public string? Role { get; set; }
-        public string? Password { get; set; }
+        // public string? Password { get; set; }
         public string? AvatarUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public ICollection<GetSessionDTO>? Sessions { get; set; }
 
 
         public override UserDTO FromEntity(UserProfile entity)
@@ -29,7 +31,8 @@ namespace HobbyCom.Application.src.DTOs.UserDTOs
                 Role = entity.Role,
                 AvatarUrl = entity.AvatarUrl,
                 CreatedAt = entity.Created_At ?? DateTime.MinValue,
-                UpdatedAt = entity.Updated_At ?? DateTime.MinValue
+                UpdatedAt = entity.Updated_At ?? DateTime.MinValue,
+                Sessions = entity.Sessions.Select(session => new GetSessionDTO().FromEntity(session)).ToList()
             };
         }
     }

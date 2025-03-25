@@ -36,7 +36,7 @@ namespace HobbyCom.Presenter.API.src.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<GetUserSessionDTO>> Create([FromBody] CreateUserDTO createUserDTO)
+        public async Task<ActionResult<UserDTO>> Create([FromBody] CreateUserDTO createUserDTO)
         {
             // if (!ModelState.IsValid)
             // {
@@ -61,7 +61,7 @@ namespace HobbyCom.Presenter.API.src.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<GetUserSessionDTO>> Login([FromBody] LoginUserDTO loginUserDTO)
+        public async Task<ActionResult<UserDTO>> Login([FromBody] LoginUserDTO loginUserDTO)
         {
 
             var loggedInUser = await _authenticationService.AuthenticateAsync(loginUserDTO);

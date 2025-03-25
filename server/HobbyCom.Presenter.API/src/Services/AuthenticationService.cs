@@ -50,23 +50,9 @@ namespace HobbyCom.Presenter.API.src.Services
             _jwtRsaKeysService = jwtRsaKeysService;
         }
 
-        public async Task<GetUserSessionDTO> CreateAsync(CreateUserDTO createUserDTO)
+        public async Task<UserDTO> CreateAsync(CreateUserDTO createUserDTO)
         {
-            var user = new UserProfile
-            {
-                Id = Guid.NewGuid(),
-                Firstname = createUserDTO.Firstname,
-                Lastname = createUserDTO.Lastname,
-                Email = createUserDTO.Email,
-                Username = createUserDTO.Username,
-                Phone = createUserDTO.Phone,
-                Role = "USER",
-                AvatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(createUserDTO.Firstname ?? "")}" +
-                            $"+{Uri.EscapeDataString(createUserDTO.Lastname ?? "")}&background=random",
-                Password = createUserDTO.Password,
-                Created_At = DateTime.UtcNow,
-                Updated_At = DateTime.UtcNow
-            };
+            var user = createUserDTO.ToEntity();
             if (string.IsNullOrWhiteSpace(user.Email))
                 throw new ArgumentException("Email cannot be null or empty.");
 
@@ -123,7 +109,8 @@ namespace HobbyCom.Presenter.API.src.Services
             return loggedInUser;
         }
 
-        public async Task<GetUserSessionDTO> AuthenticateAsync(LoginUserDTO loginUserDTO)
+
+        public async Task<UserDTO> AuthenticateAsync(LoginUserDTO loginUserDTO)
         {
             if (string.IsNullOrEmpty(loginUserDTO.Email))
             {
@@ -140,9 +127,6 @@ namespace HobbyCom.Presenter.API.src.Services
                 throw new ArgumentException("Invalid Credentials");
             }
 
-            // convert user to UserDTO
-            var userDTO = new UserDTO().FromEntity(user);
-
             // Verify password
             if (user.Password == null)
             {
@@ -154,6 +138,9 @@ namespace HobbyCom.Presenter.API.src.Services
                 throw new ArgumentException("Invalid Credentials");
             }
 
+            // convert user to UserDTO
+            var userDTO = new UserDTO().FromEntity(user);
+
             // does the user have a session
             var sessionExists = await _sessionService.CheckUserSessionExistAsync(user.Id);
             if (!sessionExists)
@@ -163,6 +150,7 @@ namespace HobbyCom.Presenter.API.src.Services
             // if the user has a session in other devices
             return await CreateUserSessionAsync(userDTO);
         }
+
 
         public Task<string> GenerateAccessToken(Guid user_id, Guid session_id, string Email, string Role)
         {
@@ -202,6 +190,7 @@ namespace HobbyCom.Presenter.API.src.Services
             return Task.FromResult(tokenHandler.WriteToken(accessToken));
         }
 
+
         public string GenerateRefreshToken()
         {
             var randomNumber = new byte[256];
@@ -209,6 +198,7 @@ namespace HobbyCom.Presenter.API.src.Services
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
         }
+
 
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
@@ -231,23 +221,29 @@ namespace HobbyCom.Presenter.API.src.Services
             return principal;
         }
 
-        public async Task<GetUserSessionDTO> CreateUserSessionAsync(UserDTO user)
+
+        public async Task<UserDTO> CreateUserSessionAsync(UserDTO user)
         {
-            if (user.Id == Guid.Empty)
-            {
-                throw new ArgumentNullException($"ID {nameof(user.Id)} is empty");
-            }
             if (user.Email == null)
             {
                 throw new ArgumentNullException(nameof(user.Email));
             }
-            if (user.Role == null)
+
+            // check user exists
+            var userProfile = await _userService.GetUserByEmailAsync(user.Email);
+            if (userProfile.Email == null)
             {
-                throw new ArgumentNullException(nameof(user.Role));
+                throw new ArgumentNullException("User not found");
             }
+
+            if (userProfile.Role == null)
+            {
+                throw new ArgumentNullException("User role is not set");
+            }
+
             var session = await _sessionService.CreateSessionAsync(new CreateSessionDTO
             {
-                UserId = user.Id,
+                UserId = userProfile.Id,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 RefreshedAt = DateTime.UtcNow
@@ -274,51 +270,63 @@ namespace HobbyCom.Presenter.API.src.Services
                 throw new ArgumentNullException(nameof(presistRefreshToken));
             }
 
-            var accessToken = await GenerateAccessToken(session.UserId, session.Id, user.Email, user.Role);
+            var accessToken = await GenerateAccessToken(session.UserId, session.Id, userProfile.Email, userProfile.Role);
 
-            return new GetUserSessionDTO
-            {
-                Id = user.Id,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                UserName = user.Username,
-                PhoneNumber = user.Phone,
-                ProfilePicture = user.AvatarUrl,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt,
-                UpdatedAt = user.UpdatedAt,
-                Sessions = new List<GetSessionDTO>
-                {
-                    new GetSessionDTO
-                    {
-                        Id = session.Id,
-                        UserId = session.UserId,
-                        CreatedAt = session.CreatedAt,
-                        UpdatedAt = session.UpdatedAt,
-                        RefreshedAt = session.RefreshedAt,
-                        Tokens = new List<GetTokenDTO>
-                        {
-                            new GetTokenDTO
-                            {
-                                Id = presistRefreshToken.Id,
-                                UserId = presistRefreshToken.UserId,
-                                Token = presistRefreshToken.Token,
-                                Access_token = accessToken,
-                                CreatedAt = presistRefreshToken.CreatedAt,
-                                TokenRevoked = presistRefreshToken.TokenRevoked,
-                                SessionId = presistRefreshToken.SessionId
-                            }
-                        }
-                    }
-                },
-            };
+            //Build the response
+            var userDTO = userProfile;
+            var sessionDTO = session;
+            var tokenDTO = presistRefreshToken;
+
+            tokenDTO.Access_token = accessToken;
+            userDTO.Sessions = new List<GetSessionDTO> { sessionDTO };
+            sessionDTO.Tokens = new List<GetTokenDTO> { tokenDTO };
+
+            return userDTO; //now corresponds to the commented out code below
+            // return new GetUserSessionDTO
+            // {
+            //     Id = user.Id,
+            //     Email = user.Email,
+            //     FirstName = user.FirstName,
+            //     LastName = user.LastName,
+            //     UserName = user.Username,
+            //     PhoneNumber = user.Phone,
+            //     ProfilePicture = user.AvatarUrl,
+            //     Role = user.Role,
+            //     CreatedAt = user.CreatedAt,
+            //     UpdatedAt = user.UpdatedAt,
+            //     Sessions = new List<GetSessionDTO>
+            //     {
+            //         new GetSessionDTO
+            //         {
+            //             Id = session.Id,
+            //             UserId = session.UserId,
+            //             CreatedAt = session.CreatedAt,
+            //             UpdatedAt = session.UpdatedAt,
+            //             RefreshedAt = session.RefreshedAt,
+            //             Tokens = new List<GetTokenDTO>
+            //             {
+            //                 new GetTokenDTO
+            //                 {
+            //                     Id = presistRefreshToken.Id,
+            //                     UserId = presistRefreshToken.UserId,
+            //                     Token = presistRefreshToken.Token,
+            //                     Access_token = accessToken,
+            //                     CreatedAt = presistRefreshToken.CreatedAt,
+            //                     TokenRevoked = presistRefreshToken.TokenRevoked,
+            //                     SessionId = presistRefreshToken.SessionId
+            //                 }
+            //             }
+            //         }
+            //     },
+            // };
         }
+
 
         public Task<bool> RevokeAllSessions(Guid id)
         {
             throw new NotImplementedException();
         }
+
 
         public async Task<bool> RevokeASession(Guid id, Guid sessionId, string refreshToken)
         {
