@@ -168,9 +168,7 @@ export default function Signup() {
                                             <Text style={styles.errorText}>{error.message}</Text>
                                         ) : formState.errors.root &&
                                           formState.errors.root.message &&
-                                          formState.errors.root.message.includes(
-                                              "already registered"
-                                          ) ? (
+                                          formState.errors.root.message.includes("Email") ? (
                                             <Text style={styles.errorText}>
                                                 {formState.errors.root.message}
                                             </Text>
@@ -201,9 +199,7 @@ export default function Signup() {
                                             <Text style={styles.errorText}>{error.message}</Text>
                                         ) : formState.errors.root &&
                                           formState.errors.root.message &&
-                                          formState.errors.root.message.includes(
-                                              "already taken"
-                                          ) ? (
+                                          formState.errors.root.message.includes("Username") ? (
                                             <Text style={styles.errorText}>
                                                 {formState.errors.root.message}
                                             </Text>
