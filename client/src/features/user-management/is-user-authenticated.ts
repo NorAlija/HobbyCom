@@ -90,7 +90,7 @@ export function useIsAuth(options?: UseIsAuthOptions) {
         refetchOnWindowFocus: true,
         retry: (failureCount: number, error: ApiError) => {
             const noRetryConditions = [
-                error.statusCode && [403, 401, 500].includes(error.statusCode)
+                error.statusCode && [403, 401, 500, 404].includes(error.statusCode)
             ]
             if (noRetryConditions.some(Boolean)) {
                 return false

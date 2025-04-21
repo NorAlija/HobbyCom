@@ -18,7 +18,7 @@ export function useLogin() {
 
         retry: (failureCount: number, error: ApiError) => {
             const noRetryConditions = [
-                error.statusCode && [400, 401, 422, 429, 500].includes(error.statusCode),
+                error.statusCode && [400, 401, 422, 429, 500, 404].includes(error.statusCode),
                 error.type?.includes("validation-error"), // Check error type
                 error.type?.includes("ValidationError") // Check error type
             ]

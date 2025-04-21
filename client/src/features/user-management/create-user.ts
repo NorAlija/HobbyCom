@@ -20,7 +20,7 @@ export function useCreateUser() {
             const noRetryConditions = [
                 error.details?.includes("already taken"),
                 error.details?.includes("already registered"),
-                error.statusCode && [400, 401, 422, 429, 500].includes(error.statusCode),
+                error.statusCode && [400, 401, 422, 429, 500, 404].includes(error.statusCode),
                 error.type?.includes("validation-error"), // Check error type
                 error.type?.includes("ValidationError") // Check error type
             ]

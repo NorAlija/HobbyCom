@@ -28,7 +28,7 @@ export function useLogout() {
         },
         retry: (failureCount: number, error: ApiError) => {
             const noRetryConditions = [
-                error.statusCode && [400, 422, 429, 401, 500].includes(error.statusCode)
+                error.statusCode && [400, 422, 429, 401, 500, 404].includes(error.statusCode)
             ]
             if (noRetryConditions.some(Boolean)) {
                 return false
