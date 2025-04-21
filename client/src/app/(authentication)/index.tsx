@@ -1,132 +1,172 @@
+import { loginSchema } from "@/schemas/auth-schema"
+import { LoginInput } from "@/types"
+import { ApiError } from "@/utils/errors"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "expo-router"
+import React from "react"
+import { Controller, useForm } from "react-hook-form"
 import {
-    View,
-    Text,
-    StyleSheet,
-    Keyboard,
+    ActivityIndicator,
     ImageBackground,
-    TouchableOpacity,
+    Keyboard,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
     TextInput,
-    TouchableWithoutFeedback
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useForm, Controller } from "react-hook-form"
-import * as zod from "zod"
-import { useRouter } from "expo-router"
-import { zodResolver } from "@hookform/resolvers/zod"
-import React, { useState } from "react"
 import { useAuth } from "../providers/auth-providers"
 
-const authSchema = zod.object({
-    email: zod.string().email({ message: "Invalid email address" }),
-    password: zod.string().min(6, { message: "Password must be at least 6 characters long" })
-})
-
 export default function Auth() {
-    const { signIn } = useAuth()
-    const [error, setError] = useState<string>("")
+    const { signIn, isSigningIn } = useAuth()
     const router = useRouter()
+    const [refreshing, setRefreshing] = React.useState(false)
+    const queryClient = useQueryClient()
 
-    const { control, handleSubmit, formState } = useForm({
-        resolver: zodResolver(authSchema),
+    const { control, handleSubmit, formState, setError, reset } = useForm({
+        resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
             password: ""
-        }
+        },
+        mode: "onChange"
     })
 
-    const handleSignIn = async (data: zod.infer<typeof authSchema>) => {
+    const onRefresh = React.useCallback(async () => {
+        await queryClient.invalidateQueries({ queryKey: ["auth"] })
+        setRefreshing(true)
+        setTimeout(() => {
+            setRefreshing(false)
+            reset()
+            setError("root", { type: "manual", message: "" })
+        }, 300)
+    }, [reset, setError])
+
+    const handleSignIn = async (data: LoginInput) => {
         try {
-            setError("")
-            await signIn(data.email, data.password)
+            setError("root", { type: "manual", message: "" })
+            await signIn(data)
             // The auth provider will handle navigation
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to sign in")
+            if (err instanceof ApiError) {
+                setError("root", { type: "manual", message: err.message ?? "Failed to sign in" })
+            } else {
+                setError("root", {
+                    type: "manual",
+                    message: err instanceof Error ? err.message : "Failed to sign in"
+                })
+            }
         }
     }
 
     return (
-        <SafeAreaView edges={["left", "right"]} style={{ flex: 1 }}>
+        <SafeAreaView
+            edges={["left", "right"]}
+            style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)" }}
+        >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
-                <ImageBackground
-                    source={require("../assets/hml.jpg")}
-                    style={styles.backGroundImage}
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    keyboardShouldPersistTaps="handled"
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 >
-                    <View style={styles.overlay} />
+                    <ImageBackground
+                        source={require("../assets/hml.jpg")}
+                        style={styles.backGroundImage}
+                    >
+                        <View style={styles.overlay} />
 
-                    <View style={styles.container}>
-                        <Text style={styles.title}>HobbyCom</Text>
-                        <Text style={styles.subtitle}>
-                            Find free sports activities to do near you
-                        </Text>
-
-                        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-                        <Controller
-                            control={control}
-                            name="email"
-                            render={({
-                                field: { value, onChange, onBlur },
-                                fieldState: { error }
-                            }) => (
-                                <>
-                                    <TextInput
-                                        placeholder="Email"
-                                        style={styles.input}
-                                        value={value}
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        placeholderTextColor="#aaa"
-                                        autoCapitalize="none"
-                                        editable={!formState.isSubmitting}
-                                        keyboardType="email-address"
-                                    />
-                                    {error && <Text style={styles.error}>{error.message}</Text>}
-                                </>
-                            )}
-                        />
-
-                        <Controller
-                            control={control}
-                            name="password"
-                            render={({
-                                field: { value, onChange, onBlur },
-                                fieldState: { error }
-                            }) => (
-                                <>
-                                    <TextInput
-                                        placeholder="Password"
-                                        style={styles.input}
-                                        value={value}
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        secureTextEntry
-                                        placeholderTextColor="#aaa"
-                                        autoCapitalize="none"
-                                        editable={!formState.isSubmitting}
-                                    />
-                                    {error && <Text style={styles.error}>{error.message}</Text>}
-                                </>
-                            )}
-                        />
-
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={handleSubmit(handleSignIn)}
-                            disabled={formState.isSubmitting}
-                        >
-                            <Text style={styles.buttonText}>
-                                {formState.isSubmitting ? "Signing in..." : "Sign In"}
+                        <View style={styles.container}>
+                            <Text style={styles.title}>HobbyCom</Text>
+                            <Text style={styles.subtitle}>
+                                Find free sports activities to do near you
                             </Text>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={[styles.button, styles.signUpButton]}
-                            onPress={() => router.push("/signup")}
-                        >
-                            <Text style={styles.buttonText}>Register</Text>
-                        </TouchableOpacity>
-                    </View>
-                </ImageBackground>
+                            {formState.errors.root?.message ? (
+                                <Text style={styles.error}>{formState.errors.root.message}</Text>
+                            ) : null}
+
+                            <Controller
+                                control={control}
+                                name="email"
+                                render={({
+                                    field: { value, onChange, onBlur },
+                                    fieldState: { error }
+                                }) => (
+                                    <>
+                                        <TextInput
+                                            placeholder="Email"
+                                            style={styles.input}
+                                            value={value}
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            placeholderTextColor="#aaa"
+                                            autoCapitalize="none"
+                                            editable={!formState.isSubmitting}
+                                            keyboardType="email-address"
+                                        />
+                                        {error && <Text style={styles.error}>{error.message}</Text>}
+                                    </>
+                                )}
+                            />
+
+                            <Controller
+                                control={control}
+                                name="password"
+                                render={({
+                                    field: { value, onChange, onBlur },
+                                    fieldState: { error }
+                                }) => (
+                                    <>
+                                        <TextInput
+                                            placeholder="Password"
+                                            style={styles.input}
+                                            value={value}
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            secureTextEntry
+                                            placeholderTextColor="#aaa"
+                                            autoCapitalize="none"
+                                            editable={!formState.isSubmitting}
+                                        />
+                                        {error && <Text style={styles.error}>{error.message}</Text>}
+                                    </>
+                                )}
+                            />
+
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={handleSubmit(handleSignIn)}
+                                disabled={isSigningIn}
+                            >
+                                <Text style={styles.buttonText}>
+                                    {isSigningIn ? (
+                                        <>
+                                            {/* Signing in... */}
+                                            <ActivityIndicator size="small" color="#0000ff" />
+                                        </>
+                                    ) : (
+                                        "Sign In"
+                                    )}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.button, styles.signUpButton]}
+                                onPress={() => router.push("/signup")}
+                            >
+                                <Text style={styles.buttonText}>Register</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </ImageBackground>
+                </ScrollView>
             </TouchableWithoutFeedback>
         </SafeAreaView>
     )
@@ -148,6 +188,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 16,
+        width: "100%"
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        backgroundColor: "red",
         width: "100%"
     },
     title: {

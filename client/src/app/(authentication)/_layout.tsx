@@ -19,9 +19,9 @@ import { Stack } from "expo-router"
 import { useAuth } from "../providers/auth-providers"
 
 export default function AuthLayout() {
-    const { loading } = useAuth()
+    const { isAuthLoading } = useAuth()
 
-    if (loading) return null
+    if (isAuthLoading) return null
 
     return (
         <Stack screenOptions={{ headerShown: false }}>

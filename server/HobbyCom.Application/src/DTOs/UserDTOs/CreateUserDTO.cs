@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using HobbyCom.Domain.src.Entities;
 
 namespace HobbyCom.Application.src.DTOs.UserDTOs
 {
-    public class CreateUserDTO
+    public class CreateUserDTO : BaseCreateDto<UserProfile>
     {
         [Required, MinLength(2, ErrorMessage = "Firstname must be at least 2 characters long.")]
         [MaxLength(50)]
@@ -20,11 +21,12 @@ namespace HobbyCom.Application.src.DTOs.UserDTOs
         [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "Username must contain only letters and numbers.")]
         public string? Username { get; set; }
 
-        [MaxLength(50)]
+        [MinLength(5, ErrorMessage = "Phone number can't be less than 5 digits")]
+        [MaxLength(15, ErrorMessage = "Phone number can't exceed 15 digits")]
         [Phone]
         public string? Phone { get; set; }
 
-        public string? Type { get; set; }
+        public string? Role { get; set; }
 
         public string? AvatarUrl { get; set; }
 
@@ -35,5 +37,22 @@ namespace HobbyCom.Application.src.DTOs.UserDTOs
 
         [Required, Compare(nameof(Password))]
         public string? ConfirmPassword { get; set; }
+
+        public override UserProfile ToEntity()
+        {
+            return new UserProfile
+            {
+                Firstname = Firstname,
+                Lastname = Lastname,
+                Email = Email,
+                Username = Username,
+                Phone = Phone,
+                Role = Role,
+                AvatarUrl = AvatarUrl,
+                Password = Password,
+                Created_At = DateTime.UtcNow,
+                Updated_At = DateTime.UtcNow
+            };
+        }
     }
 }

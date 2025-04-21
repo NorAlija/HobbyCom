@@ -4,12 +4,9 @@ namespace HobbyCom.Application.src.IServices
 {
     public interface IUserService
     {
+        Task<string> GetUserEmailByIdAsync(Guid id);
 
-        /// <summary>
-        /// Get logged in user information
-        /// </summary>
-        /// <returns>Logged in user information</returns>
-        Task<GetUserInfoDTO> GetLoggedInUserInfo();
+        Task<UserDTO> GetUserByEmailAsync(String email);
 
     }
 }
